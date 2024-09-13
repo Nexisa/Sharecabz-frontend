@@ -6,6 +6,7 @@ import Home from './src/screens/Home';
 import Extra from './src/screens/Extra';
 import { NavigationContainer } from '@react-navigation/native';
 
+//TODO check if asyn signed or not from async then go to..... home or sign in
 
 const Stack = createStackNavigator();
 
