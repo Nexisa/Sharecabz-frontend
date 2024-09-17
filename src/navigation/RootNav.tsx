@@ -20,10 +20,11 @@ import ContactUs from "../screens/ContactUs";
 import FaqScreen from "../screens/FAQ";
 import Activity from "../screens/TripDetails";
 
-import AdminHome from "../screens/Admin/AdminHome";
+import AdminHome from "../screens/admin/AdminHome";
 import JsonSlice, { updateField } from "../utils/JsonSlice";
-import UserDetailPage from "../screens/Admin/UserDetailPage";
-// import DriverAllocation from "../screens/Admin/DriverAllocation"
+import UserDetailPage from "../screens/admin/UserDetailPage";
+import DriverAllocation from "../screens/admin/DriverAllocation";
+import AllotmentStatusPage from "../screens/admin/DriverAllotment_Status";
 
 const Stack = createStackNavigator();
 
@@ -51,25 +52,19 @@ const MainStack = () => (
     <Stack.Screen name="About Us" component={AboutUs} />
     <Stack.Screen name="ContactUs" component={ContactUs} />
 
-    
     <Stack.Screen name="AdminHome" component={AdminHome} />
     <Stack.Screen name="UserDetailPage" component={UserDetailPage} />
-
+    <Stack.Screen name="DriverAllocation" component={DriverAllocation} />
+    <Stack.Screen name="Status" component={AllotmentStatusPage} />
   </Stack.Navigator>
 );
 
-
-
 const RootNav = () => {
   const isAuthenticated = useSelector(selectIsAuthenticated);
-  
 
-
-  
   return (
     <NavigationContainer>
-      {isAuthenticated ? <MainStack />: <AuthStack />
-      }
+      {isAuthenticated ? <MainStack /> : <AuthStack />}
     </NavigationContainer>
   );
 };

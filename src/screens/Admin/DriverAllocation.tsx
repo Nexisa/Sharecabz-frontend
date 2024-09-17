@@ -13,10 +13,12 @@ const DriverAllocation = () => {
 
   const handleDriverAllocation = () => {
     console.log('Driver allocated:', driverName, cabNumber, cabModel);
+    navigation.navigate('Status' as never);// Redirect to Driver Allotment Status
   };
 
   const handleCancelBooking = () => {
     console.log('Booking cancelled');
+    navigation.navigate('AdminHome' as never);// Redirect to Driver Booking Details
   };
 
   const goBack = () => {

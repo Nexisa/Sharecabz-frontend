@@ -1,27 +1,67 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { View, Text, StyleSheet, Image, TouchableOpacity, TextInput, ScrollView } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
+
 const UserDetailPage = () => {
   const navigation = useNavigation();
+  
+  // State to store user details fetched from API
+  const [userDetails, setUserDetails] = useState({
+    email: '',
+    phone: '',
+    sourceLocation: '',
+    destinationLocation: '',
+    pickupLocation: '',
+    date: '',
+    time: '',
+    totalSeats: '',
+    paymentStatus: '',
+  });
+
+  // Function to fetch user details from API
+  const fetchUserDetails = async () => {
+    try {
+      // Fetch data from the API
+      const response = await fetch('https://api.example.com/userDetails'); // Replace with actual API
+      const data = await response.json();
+      // Set the state with the fetched data
+      setUserDetails({
+        email: data.email,
+        phone: data.phone,
+        sourceLocation: data.sourceLocation,
+        destinationLocation: data.destinationLocation,
+        pickupLocation: data.pickupLocation,
+        date: data.date,
+        time: data.time,
+        totalSeats: data.totalSeats,
+        paymentStatus: data.paymentStatus,
+      });
+    } catch (error) {
+      console.log('Error fetching user details:', error);
+    }
+  };
+
+  useEffect(() => {
+    // Fetch user details on component mount
+    fetchUserDetails();
+  }, []);
+
   const handleBackPress = () => {
     console.log('Back button pressed');
     navigation.goBack();
   };
-  const fetchUserDetails = () => {
-    // Fetch user details from API
-    console.log('Fetching user details');
-  };
+
   return (
     <ScrollView contentContainerStyle={styles.container}>
       <View className="absolute top-1 left-0 right-0 flex-row px-2 ">
-          {/* Back Icon on the left */}
-          <TouchableOpacity onPress={handleBackPress} className="p-2 mt-14 ">
-            <Ionicons name="arrow-back" size={24} color="black" />
-          </TouchableOpacity>
-
-          <Text className="p-2 mt-14 ">User Booking Details</Text>
+        {/* Back Icon on the left */}
+        <TouchableOpacity onPress={handleBackPress} className="p-2 mt-14 ">
+          <Ionicons name="arrow-back" size={24} color="black" />
+        </TouchableOpacity>
+        <Text className="p-2 mt-14 ">User Booking Details</Text>
       </View>
+
       <View style={styles.userDetail}>
         <Image
           style={styles.avatar}
@@ -34,31 +74,42 @@ const UserDetailPage = () => {
       {/* User Booking Details */}
       <View style={styles.detailsContainer}>
         <Text style={styles.title}>Email</Text>
-        <TextInput style={styles.input} value="emily.smith@example.com" editable={false} />
+        <TextInput style={styles.input} value={userDetails.email} editable={false} />
+        
         <Text style={styles.title}>Phone</Text>
-        <TextInput style={styles.input} value="+1 234 567 8901" editable={false} />
+        <TextInput style={styles.input} value={userDetails.phone} editable={false} />
+        
         <Text style={styles.title}>Source Location</Text>
-        <TextInput style={styles.input} value="Gangtok" editable={false} placeholder="Source Location" />
+        <TextInput style={styles.input} value={userDetails.sourceLocation} editable={false} placeholder="Source Location" />
+        
         <Text style={styles.title}>Destination Location</Text>
-        <TextInput style={styles.input} value="Lachung" editable={false} placeholder="Destination Location" />
+        <TextInput style={styles.input} value={userDetails.destinationLocation} editable={false} placeholder="Destination Location" />
+        
         <Text style={styles.title}>Pickup Location</Text>
-        <TextInput style={styles.input} value="Kazi Road power house" editable={false} placeholder="Pickup Location" />
+        <TextInput style={styles.input} value={userDetails.pickupLocation} editable={false} placeholder="Pickup Location" />
+        
+        <Text style={styles.title}>Date</Text>
+        <TextInput style={styles.input} value={userDetails.date} editable={false} />
+        
+        <Text style={styles.title}>Time</Text>
+        <TextInput style={styles.input} value={userDetails.time} editable={false} />
+        
         <Text style={styles.title}>Total Seats</Text>
-        <TextInput style={styles.input} value="5" editable={false} placeholder="Total Seats" />
+        <TextInput style={styles.input} value={userDetails.totalSeats} editable={false} placeholder="Total Seats" />
 
         {/* Payment Status */}
         <View style={styles.statusContainer}>
           <Text style={styles.statusLabel}>Payment Status</Text>
-          <Text style={styles.statusCompleted}>Completed</Text>
+          <Text style={styles.statusCompleted}>{userDetails.paymentStatus}</Text>
         </View>
 
         {/* Buttons */}
         <View style={styles.buttonContainer}>
-          <TouchableOpacity style={styles.cancelButton}>
+          <TouchableOpacity onPress={() => navigation.navigate('AdminHome' as never)} style={styles.cancelButton}>
             <Text style={styles.cancelButtonText}>Cancel</Text>
           </TouchableOpacity>
 
-          <TouchableOpacity style={styles.nextButton}>
+          <TouchableOpacity onPress={() => navigation.navigate('DriverAllocation' as never)} style={styles.nextButton}>
             <Text style={styles.nextButtonText}>Next Page</Text>
           </TouchableOpacity>
         </View>
@@ -75,7 +126,7 @@ const styles = StyleSheet.create({
   },
   userDetail: {
     alignItems: 'center',
-    marginTop:100,
+    marginTop: 100,
     marginBottom: 20,
   },
   avatar: {
@@ -98,7 +149,7 @@ const styles = StyleSheet.create({
   },
   title: {
     fontWeight: 'bold',
-    padding:5,
+    padding: 5,
   },
   input: {
     borderWidth: 1,
@@ -116,13 +167,13 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: 'bold',
     color: '#333',
-    padding:5,
+    padding: 5,
   },
   statusCompleted: {
     fontSize: 20,
     color: '#28a745', // Green color for completed
     fontWeight: 'bold',
-    padding:5,
+    padding: 5,
   },
   buttonContainer: {
     flexDirection: 'row',
