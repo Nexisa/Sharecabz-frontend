@@ -29,6 +29,7 @@ type FormData = {
   username: string;
   phoneNumber: string;
   email: string;
+  otp: string;
   password: string;
   confirmPassword: string;
 };
@@ -38,6 +39,7 @@ const SignUpScreen: React.FC<Props> = ({ navigation }) => {
     username: '',
     phoneNumber: '',
     email: '',
+    otp: '',
     password: '',
     confirmPassword: '',
   });
@@ -67,6 +69,18 @@ const SignUpScreen: React.FC<Props> = ({ navigation }) => {
       value = value.replace(/[^0-9]/g, '');
     }
 
+    if (name === 'otp') {
+      if (/[^0-9]/.test(value)) {
+        Toast.show({
+          type: 'error',
+          position: 'top',
+          text1: 'Error',
+          text2: 'OTP can only contain digits (0-9)',
+        });
+      }
+      value = value.replace(/[^0-9]/g, '');
+    }
+
     setFormData({
       ...formData,
       [name]: value,
@@ -79,9 +93,9 @@ const SignUpScreen: React.FC<Props> = ({ navigation }) => {
   };
 
   const validateForm = () => {
-    const { username, phoneNumber, email, password, confirmPassword } = formData;
+    const { username, phoneNumber, email, otp, password, confirmPassword } = formData;
 
-    if (!username || !phoneNumber || !email || !password || !confirmPassword) {
+    if (!username || !phoneNumber || !email || !otp || !password || !confirmPassword) {
       Toast.show({
         type: 'error',
         position: 'top',
@@ -165,6 +179,7 @@ const SignUpScreen: React.FC<Props> = ({ navigation }) => {
         {renderInputField('User Name', 'username')}
         {renderInputField('Phone Number', 'phoneNumber')}
         {renderInputField('E-mail', 'email')}
+        {renderInputField('OTP', 'otp')}
         {renderInputField('Password', 'password', true)}
         {renderInputField('Confirm Password', 'confirmPassword', true)}
 
