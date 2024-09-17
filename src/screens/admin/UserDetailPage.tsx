@@ -60,7 +60,7 @@ const UserDetailPage = () => {
         {/* Buttons */}
         <View style={styles.buttonContainer}>
           <TouchableOpacity style={styles.cancelButton}>
-            <Text style={styles.cancelButtonText}>Cancel</Text>
+            <Text style={styles.cancelButtonText} onPress={() => navigation.navigate("AdminHome" as never)}>Cancel</Text>
           </TouchableOpacity>
 
           <TouchableOpacity onPress={() => navigation.navigate("DriverAllocation" as never)} style={styles.nextButton}>

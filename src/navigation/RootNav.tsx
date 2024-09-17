@@ -20,10 +20,11 @@ import ContactUs from "../screens/ContactUs";
 import FaqScreen from "../screens/FAQ";
 import Activity from "../screens/TripDetails";
 
-import AdminHome from "../screens/admin/AdminHome";
+import AdminHome from "../screens/Admin/AdminHome";
 import JsonSlice, { updateField } from "../utils/JsonSlice";
 import UserDetailPage from "../screens/admin/UserDetailPage";
-import DriverAllocation from "../screens/admin/DriverAllocation";
+import DriverAllocation from "../screens/Admin/DriverAllocation";
+import AllotmentStatusPage from "../screens/DriverAllotment_Status";
 
 
 const Stack = createStackNavigator();
@@ -56,6 +57,7 @@ const MainStack = () => (
     <Stack.Screen name="AdminHome" component={AdminHome} />
     <Stack.Screen name="UserDetailPage" component={UserDetailPage} />
     <Stack.Screen name="DriverAllocation" component={DriverAllocation} />
+    <Stack.Screen name="Status" component={AllotmentStatusPage} />
 
   </Stack.Navigator>
 );
