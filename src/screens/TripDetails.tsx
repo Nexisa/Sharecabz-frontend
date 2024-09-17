@@ -82,7 +82,7 @@ const TripDetailsScreen = () => {
         <Text className="mt-4 text-base text-gray-600">Booking ID: {bookingId || 'N/A'}</Text>
 
         {/* Cancel Ride Button */}
-        <TouchableOpacity className="bg-red-600 rounded-lg py-3 px-6 mt-5">
+        <TouchableOpacity className="bg-red-600 rounded-lg py-3 px-6 mt-5" onPress={() => navigation.navigate("Cancel" as never)}>
           <Text className="text-white text-lg font-bold">Cancel Ride</Text>
         </TouchableOpacity>
       </View>

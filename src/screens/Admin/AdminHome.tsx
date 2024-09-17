@@ -1,10 +1,11 @@
 
-import { FlatList, SafeAreaView, ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { FlatList, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import BookingDetails from "../../components/BookingDetails";
 import React, { useState } from "react";
 
 import { Ionicons } from "@expo/vector-icons";
 import { useNavigation } from "@react-navigation/native";
+import { SafeAreaView } from "react-native-safe-area-context";
 
 interface BookingDetail {
   name: string;
@@ -62,7 +63,7 @@ const AdminHome = () => {
     console.log("Next button pressed");
   }
   return (
-    <ScrollView className="flex-1 p-5 pt-5" >
+    <SafeAreaView className="flex-1 p-5 pt-5" >
       
       <View style={styles.header}>
         <View style={styles.searchBar}>
@@ -94,7 +95,7 @@ const AdminHome = () => {
         keyExtractor={(item, index) => `${item.bookingId}-${index}`}
       />
     
-    </ScrollView>
+    </SafeAreaView>
    
   );
 };
@@ -121,7 +122,6 @@ const styles = StyleSheet.create({
     padding: 10,
     borderBottomWidth: 1,
     borderBottomColor: "#eee",
-    marginTop: 20,
   },
   searchBar: {
     flex: 1,

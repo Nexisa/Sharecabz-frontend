@@ -1,85 +1,54 @@
-import React from 'react';
-import { View, ImageBackground, StyleSheet, Text, TouchableOpacity, Image } from 'react-native';
-import { useDispatch } from 'react-redux';
-import { login } from '../utils/Slice'; 
-import { useNavigation } from '@react-navigation/native';
+import React from "react";
+import {
+  View,
+  ImageBackground,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  Image,
+  SafeAreaView,
+} from "react-native";
+import { useDispatch } from "react-redux";
+import { login } from "../utils/Slice";
+import { useNavigation } from "@react-navigation/native";
 // import LinearGradient from 'react-native-linear-gradient';
-import { LinearGradient } from 'expo-linear-gradient';
-
+import { LinearGradient } from "expo-linear-gradient";
 
 const CancellationPopUpScreen = () => {
-    const navigation = useNavigation();
-    const dispatch = useDispatch();
+  const navigation = useNavigation();
+  const dispatch = useDispatch();
 
-    const handleButtonPress = () => {
-        dispatch(login());
-        navigation.navigate('Home' as never); //Redirect To the Home Page .....
-    }
+  const handleButtonPress = () => {
+    dispatch(login());
+    navigation.navigate("Home" as never); //Redirect To the Home Page .....
+  };
 
-return (
-    <LinearGradient 
-    style={styles.container}
-    colors={['#CAF880', '#71CE7E']}>
-        <Image
-            source={require('../../assets/cancellation.png')}
-            style={styles.image}
-        />
-        <View style={styles.messageBox}>
-            <Text style={styles.title}>OOPS!! SEEMS YOU CANCELLED THE RIDE</Text>
-            <TouchableOpacity onPress={handleButtonPress} style={styles.button}>
-                <Text style={styles.buttonText}>CLOSE</Text>
-            </TouchableOpacity>
+  return (
+    <LinearGradient colors={['#CAF880', '#71CE7E']} className="flex-1">
+      <SafeAreaView className="flex-1">
+        <View className="flex-1 items-center justify-center">
+          <Image
+            source={require("../../assets/cancellation.png")}
+            className="resizeMode-contain"
+          />
         </View>
-     </LinearGradient>
-);
-};
+        <View className="bg-white rounded-t-3xl h-1/3 p-8 items-center justify-between">
+          <Text className="text-3xl font-bold text-black text-center mb-4">
+            OOPS!! SEEMS YOU CANCELLED THE RIDE
+          </Text>
 
-const styles = StyleSheet.create({
-    container: {
-        flex: 1,
-        justifyContent: 'center',
-        alignItems: 'center',
-        // backgroundColor: '#81D720', 
-    },
-    image: {
-        width: 170, // Increased width
-        height: 170, // Increased height
-        position: 'absolute',
-        top: '25%',
-        marginBottom: 20,
-    },
-    messageBox: {
-        position: 'absolute',
-        bottom: 0.1,
-        width: '100%',
-        height: '40%',
-        backgroundColor: 'white',
-        top: '70%',
-        padding: 50,
-        borderRadius: 50,
-        alignItems: 'center',
-    },
-    title: {
-        // fontFamily: 'Sniglet',     //Font family is not a system font .
-        fontSize: 32,
-        // fontWeight: 'bold',
-        color: 'black',
-        textAlign: 'center',
-    },
-    button: {
-        backgroundColor: '#81D742',
-        width: 332,
-        height: 56,
-        top: 50,
-        paddingVertical: 15,
-        paddingHorizontal: 10,
-        borderRadius: 15,
-    },
-    buttonText: {
-        color: 'black',
-        fontSize: 20,
-        textAlign: 'center',
-    },
-});
+          <TouchableOpacity
+            onPress={handleButtonPress}
+            className="bg-[#81D742] w-2/3 rounded-2xl py-3"
+          >
+            <Text className="text-black text-xl font-semibold text-center">
+              CLOSE
+            </Text>
+          </TouchableOpacity>
+        </View>
+      </SafeAreaView>
+    </LinearGradient>
+  );
+};
 
 export default CancellationPopUpScreen;
