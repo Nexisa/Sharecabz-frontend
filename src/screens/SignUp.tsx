@@ -4,13 +4,11 @@ import {
   Text,
   TextInput,
   TouchableOpacity,
-  StyleSheet,
   Image,
-  Alert,
 } from 'react-native';
 import { StackNavigationProp } from '@react-navigation/stack';
+import Toast from 'react-native-toast-message';
 
-// Define the type for the navigation prop
 type RootStackParamList = {
   SignIn: undefined;
   SignUp: undefined;
@@ -27,7 +25,6 @@ type Props = {
   navigation: SignUpScreenNavigationProp;
 };
 
-// Define form data type
 type FormData = {
   username: string;
   phoneNumber: string;
@@ -46,21 +43,69 @@ const SignUpScreen: React.FC<Props> = ({ navigation }) => {
   });
 
   const handleChange = (name: keyof FormData, value: string) => {
+    if (name === 'username') {
+      if (/[^a-zA-Z]/.test(value)) {
+        Toast.show({
+          type: 'error',
+          position: 'top',
+          text1: 'Error',
+          text2: 'Username can only contain letters (a-z or A-Z)',
+        });
+      }
+      value = value.replace(/[^a-zA-Z]/g, '');
+    }
+
+    if (name === 'phoneNumber') {
+      if (/[^0-9]/.test(value)) {
+        Toast.show({
+          type: 'error',
+          position: 'top',
+          text1: 'Error',
+          text2: 'Phone Number can only contain digits (0-9)',
+        });
+      }
+      value = value.replace(/[^0-9]/g, '');
+    }
+
     setFormData({
       ...formData,
       [name]: value,
     });
   };
 
+  const isValidEmail = (email: string) => {
+    const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return regex.test(email);
+  };
+
   const validateForm = () => {
     const { username, phoneNumber, email, password, confirmPassword } = formData;
 
     if (!username || !phoneNumber || !email || !password || !confirmPassword) {
-      Alert.alert('Error', 'Please fill in all fields');
+      Toast.show({
+        type: 'error',
+        position: 'top',
+        text1: 'Error',
+        text2: 'Please fill in all fields',
+      });
       return false;
     }
     if (password !== confirmPassword) {
-      Alert.alert('Error', 'Passwords do not match');
+      Toast.show({
+        type: 'error',
+        position: 'top',
+        text1: 'Error',
+        text2: 'Passwords do not match',
+      });
+      return false;
+    }
+    if (!isValidEmail(email)) {
+      Toast.show({
+        type: 'error',
+        position: 'top',
+        text1: 'Error',
+        text2: 'Invalid email address',
+      });
       return false;
     }
 
@@ -69,8 +114,13 @@ const SignUpScreen: React.FC<Props> = ({ navigation }) => {
 
   const handleSignUp = () => {
     if (validateForm()) {
-      Alert.alert('Success', 'Account Created Successfully');
-      navigation.navigate('SignIn'); // Navigate to SignIn screen
+      Toast.show({
+        type: 'success',
+        position: 'top',
+        text1: 'Success',
+        text2: 'Account Created Successfully',
+      });
+      navigation.navigate('SignIn');
     }
   };
 
@@ -79,9 +129,16 @@ const SignUpScreen: React.FC<Props> = ({ navigation }) => {
     name: keyof FormData,
     secureTextEntry = false
   ) => (
-    <View style={styles.inputContainer}>
+    <View style={{ width: '100%', marginBottom: 15 }}>
       <TextInput
-        style={styles.input}
+        style={{
+          borderWidth: 1,
+          borderColor: '#ccc',
+          borderRadius: 25,
+          padding: 10,
+          paddingHorizontal: 15,
+          color: '#000',
+        }}
         placeholder={placeholder}
         placeholderTextColor="#7A7A7A"
         secureTextEntry={secureTextEntry}
@@ -92,15 +149,17 @@ const SignUpScreen: React.FC<Props> = ({ navigation }) => {
   );
 
   return (
-    <View style={styles.container}>
-      <View style={styles.header} />
+    <View style={{ flex: 1, backgroundColor: '#81D742', justifyContent: 'center', alignItems: 'center' }}>
+      <View style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 200, backgroundColor: '#81D742', borderBottomLeftRadius: 30, borderBottomRightRadius: 30, zIndex: -1 }} />
 
-      <View style={styles.formContainer}>
-        <Text style={styles.title}>SIGN UP</Text>
+      <View style={{ width: '90%', maxWidth: 400, backgroundColor: '#fff', borderRadius: 10, padding: 20, shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.1, shadowRadius: 5, elevation: 5, alignItems: 'center' }}>
+        <Text style={{ fontSize: 24, fontWeight: 'bold', color: '#000', marginVertical: 20 }}>
+          SIGN UP
+        </Text>
 
         <Image
-          source={require('../../assets/Images/logo.jpg')} 
-          style={styles.logo}
+          source={require('../../assets/Images/logo.jpg')}
+          style={{ width: 200, height: 100, marginBottom: 20 }}
         />
 
         {renderInputField('User Name', 'username')}
@@ -109,95 +168,29 @@ const SignUpScreen: React.FC<Props> = ({ navigation }) => {
         {renderInputField('Password', 'password', true)}
         {renderInputField('Confirm Password', 'confirmPassword', true)}
 
-        <TouchableOpacity style={styles.signUpButton} onPress={handleSignUp}>
-          <Text style={styles.signUpButtonText}>SIGN UP</Text>
+        <TouchableOpacity
+          style={{
+            backgroundColor: '#81D742',
+            paddingVertical: 15,
+            borderRadius: 25,
+            marginVertical: 20,
+            alignItems: 'center',
+            width: '100%',
+          }}
+          onPress={handleSignUp}
+        >
+          <Text style={{ color: '#fff', fontWeight: 'bold' }}>SIGN UP</Text>
         </TouchableOpacity>
 
         <TouchableOpacity onPress={() => navigation.navigate('SignIn')}>
-          <Text style={styles.signInText}>
-            Already have an account? <Text style={styles.signInLink}>SIGN IN</Text>
+          <Text style={{ textAlign: 'center', marginTop: 20, color: '#7A7A7A' }}>
+            Already have an account? <Text style={{ color: '#81D742', fontWeight: 'bold' }}>SIGN IN</Text>
           </Text>
         </TouchableOpacity>
       </View>
+      <Toast />
     </View>
   );
 };
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#81D742', 
-    justifyContent: 'center',    
-    alignItems: 'center',        
-  },
-  header: {
-    position: 'absolute',
-    top: 0,
-    left: 0,
-    right: 0,
-    height: 200,
-    backgroundColor: '#81D742',
-    borderBottomLeftRadius: 30,
-    borderBottomRightRadius: 30,
-    zIndex: -1,
-  },
-  formContainer: {
-    width: '90%',
-    maxWidth: 400, 
-    backgroundColor: '#fff',
-    borderRadius: 10,
-    padding: 20,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 5,
-    elevation: 5,
-    alignItems: 'center',
-  },
-  title: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    color: '#000',
-    marginVertical: 20,
-  },
-  logo: {
-    width: 200,
-    height: 100,
-    marginBottom: 20,
-  },
-  inputContainer: {
-    width: '100%',
-    marginBottom: 15,
-  },
-  input: {
-    borderWidth: 1,
-    borderColor: '#ccc',
-    borderRadius: 25,
-    padding: 10,
-    paddingHorizontal: 15,
-    color: '#000',
-  },
-  signUpButton: {
-    backgroundColor: '#81D742',
-    paddingVertical: 15,
-    borderRadius: 25,
-    marginVertical: 20,
-    alignItems: 'center',
-    width: '100%',
-  },
-  signUpButtonText: {
-    color: '#fff',
-    fontWeight: 'bold',
-  },
-  signInText: {
-    textAlign: 'center',
-    marginTop: 20,
-    color: '#7A7A7A',
-  },
-  signInLink: {
-    color: '#81D742',
-    fontWeight: 'bold',
-  },
-});
 
 export default SignUpScreen;

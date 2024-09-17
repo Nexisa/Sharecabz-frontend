@@ -37,7 +37,7 @@ const HomeScreen = () => {
                                 source={require('../../assets/Images/logo-removebg-preview.png')}
                             />
                         </View>
-                        <TouchableOpacity onPress={toggleProfileModal} className="p-2 mt-6">
+                        <TouchableOpacity onPress={toggleProfileModal} className="p-2 mt-14">
                             <ProfileModal modalVisible={modalVisible} toggleModal={toggleProfileModal} />
                         </TouchableOpacity>
                     </View>
@@ -84,30 +84,33 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
     },
     logo: {
-       width: 100,
-       height: 100,
-       marginTop: 25,
+       width: 200,
+       height: 200,
+       marginTop: 10,
     },
     textContainer: {
-        width: width * 0.65,
+        width: width * 0.9,
         height: width * 0.7, 
-        paddingLeft: height * 0.02, 
+        paddingLeft: height * 0.04, 
         paddingTop: height * 0.02,
     },
     introText: {
         fontFamily: 'Roboto',
-        fontSize: width * 0.05,
+        fontSize: width * 0.07,
+        marginTop: height * 0.07,
         color: '#449906',
         fontWeight: 'bold',
-        letterSpacing: 0.5,
+        letterSpacing: 0.9,
+        lineHeight: width * 0.1,
     },
     luxuryText: {
         fontFamily: 'RobotoSlab-Variable',
         fontSize: width * 0.08,
         color: '#3B3B3B',
         fontWeight: 'bold',
-        marginBottom: height * 0.02,
-        letterSpacing: 1,
+        marginVertical: height * 0.02,
+        letterSpacing: 5,
+        
         
     },
     description: {
@@ -115,12 +118,13 @@ const styles = StyleSheet.create({
         fontSize: width * 0.035,
         color: 'black',
         marginBottom: height * 0.03,
-        lineHeight: width * 0.06,
+        lineHeight: width * 0.07,
     },
     button: {
         backgroundColor: '#2C2C2C',
-        borderRadius: 10,
+        borderRadius: 15,
         padding: width * 0.04,
+        fontWeight: 'bold',
         alignSelf: 'flex-start',
     },
     buttonText: {

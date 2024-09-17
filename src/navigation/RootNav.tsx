@@ -1,6 +1,8 @@
 import React from "react";
 import { NavigationContainer } from "@react-navigation/native";
 import { createStackNavigator } from "@react-navigation/stack";
+import Toast from 'react-native-toast-message';
+
 import { useDispatch, useSelector } from "react-redux";
 import { selectIsAuthenticated } from "../utils/Slice";
 
@@ -32,8 +34,10 @@ const AuthStack = () => (
   <Stack.Navigator screenOptions={{ headerShown: false }}>
     <Stack.Screen name="SignIn" component={SignIn} />
     <Stack.Screen name="SignUp" component={SignUpScreen} />
+    
     <Stack.Screen name="ForgotPassword" component={ForgotPassword} />
   </Stack.Navigator>
+
 );
 
 const MainStack = () => (

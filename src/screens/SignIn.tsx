@@ -5,14 +5,14 @@ import {
   TextInput,
   TouchableOpacity,
   Image,
-  Alert,
 } from 'react-native';
 import { FontAwesome } from '@expo/vector-icons';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { useNavigation } from '@react-navigation/native';
-import { useDispatch, useSelector } from 'react-redux';
+import { useDispatch } from 'react-redux';
 import { login } from '../utils/Slice';
-import { Data } from '../services/Data';
+import Toast from 'react-native-toast-message';
+
 type RootStackParamList = {
   SignIn: undefined;
   SignUp: undefined;
@@ -37,22 +37,42 @@ const SignInScreen: React.FC<Props> = () => {
 
   const handleSignIn = async () => {
     if (!email || !password) {
-      Alert.alert('Error', 'Please fill in all fields');
+      Toast.show({
+        type: 'error',
+        position: 'top',
+        text1: 'Error',
+        text2: 'Please fill in all fields',
+      });
       return;
     }
-    await dispatch(login());
-    //TODO
-  //  await Data("a","b");
-    Alert.alert('Sign In', `Welcome, ${email}`);
 
-    //TODO
-    //service callinf fn here to sign in 
-  const role=email;
-    if (role === 'admin') {
-      navigation.navigate('AdminHome' as never);
+    try {
+      await dispatch(login());
+      // Replace with your actual service call
+      // await Data("a", "b");
+
+      Toast.show({
+        type: 'success',
+        position: 'top',
+        text1: 'Sign In',
+        text2: `Welcome, ${email}`,
+      });
+
+      // TODO: Implement actual role-based navigation
+      const role = email; // Replace with your actual logic
+      if (role === 'admin') {
+        navigation.navigate('AdminHome' as never);
+      } else {
+        navigation.navigate('Home' as never);
+      }
+    } catch (error) {
+      Toast.show({
+        type: 'error',
+        position: 'top',
+        text1: 'Sign In Failed',
+        text2: 'An error occurred during sign-in. Please try again.',
+      });
     }
-    else
-    navigation.navigate('Home' as never);
   };
 
   return (
@@ -117,6 +137,9 @@ const SignInScreen: React.FC<Props> = () => {
           </Text>
         </TouchableOpacity>
       </View>
+
+      {/* Toast Container */}
+      <Toast />
     </View>
   );
 };

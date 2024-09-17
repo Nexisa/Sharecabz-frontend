@@ -5,8 +5,12 @@ import Extra from './src/screens/Extra';
 import LoadingScreen from './src/components/LoadingScreen';
 import RootNav from './src/navigation/RootNav';
 import { Provider } from 'react-redux';
+import Toast from 'react-native-toast-message';
+
 
 import { store } from './src/utils/Store';  // Import your store
+
+
 
 // Define the stack navigator
 const Stack = createStackNavigator();
@@ -34,6 +38,7 @@ export default function App() {
   return (
     <Provider store={store}>
     <RootNav/>
+    <Toast />
     </Provider>
   );
 }

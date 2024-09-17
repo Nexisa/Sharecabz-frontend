@@ -27,7 +27,7 @@ const ContactUs: React.FC = () => {
   return (
     <View style={styles.container}>
       <LinearGradient colors={['#CAF880', '#71CE7E']} style={styles.linearGradient}>
-        <View className="absolute top-2 left-0 right-0 flex-row justify-between px-2 z-10">
+        <View className="absolute top-2 left-3 right-0 flex-row justify-between px-2 z-10">
           {/* Back Icon on the left */}
           <TouchableOpacity onPress={handleBackPress} className="p-2 mt-14 ">
             <Ionicons name="arrow-back" size={24} color="black" />
@@ -134,7 +134,7 @@ const styles = StyleSheet.create({
   icons: {
     paddingTop:10,
     flexDirection: 'row',
-    gap: 8,
+    gap: 12,
   },
   buttonContainer: {
     flexDirection: 'column',
@@ -161,14 +161,14 @@ const styles = StyleSheet.create({
   footer: {
     flexDirection: 'row',
     justifyContent: 'space-evenly',
-    marginTop: 60,
-    gap: 40,
+    marginTop: 40,
+    gap: 50,
     padding: 40,
   },
   footerText: {
     color: '#333',
     textAlign: 'center',
-    fontSize: 8,
+    fontSize: 10,
   },
 });
 

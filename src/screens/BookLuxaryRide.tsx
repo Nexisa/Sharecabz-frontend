@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, Text, TouchableOpacity, Dimensions, Alert, FlatList, Image } from 'react-native';
+import { View, Text, TouchableOpacity, Dimensions, FlatList, Image } from 'react-native';
 import CalendarPicker from "react-native-calendar-picker";
 import IIcon from '@expo/vector-icons/FontAwesome';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -8,6 +8,7 @@ import { updateField } from '../utils/JsonSlice';
 import Dropdowncom from '../components/Dropdowncom';
 import { useNavigation } from '@react-navigation/native';
 import ProfileModal from '../components/ProfileModal';
+import Toast from 'react-native-toast-message';
 
 const LuxuryRideBooking = () => {
   const [modalVisible, setModalVisible] = useState(false);
@@ -28,25 +29,42 @@ const LuxuryRideBooking = () => {
     if (selectedDate >= today) {
       handleUpdate('date', date.toDateString());
     } else {
-      Alert.alert('Invalid Date', 'You cannot book for a past date.');
+      Toast.show({
+        type: 'error',
+        text1: 'Invalid Date',
+        text2: 'You cannot book for a past date.'
+      });
     }
   };
 
   const handleDone = () => {
     const today = new Date();
     today.setHours(0, 0, 0, 0);
-
+  
     const selectedDate = new Date(jsonData.date);
-    if (jsonData.source && jsonData.destination && jsonData.pickupPoint && jsonData.date) {
-      if (selectedDate >= today) {
-        navigation.navigate("FinalScreen" as never);
-      } else {
-        Alert.alert('Invalid Date', 'You cannot book for a past date.');
-      }
+  
+    // Check if all required fields are filled
+    if (!jsonData.source || !jsonData.destination || !jsonData.pickupPoint || !jsonData.date) {
+      Toast.show({
+        type: 'error',
+        text1: 'Missing Information',
+        text2: 'Please fill all the fields before proceeding.'
+      });
+      return;
+    }
+  
+    // Check if the selected date is valid
+    if (selectedDate >= today) {
+      navigation.navigate("FinalScreen" as never);
     } else {
-      Alert.alert('Please fill all the fields');
+      Toast.show({
+        type: 'error',
+        text1: 'Invalid Date',
+        text2: 'You cannot book for a past date.'
+      });
     }
   };
+  
 
   const toggleProfileModal = () => {
     setModalVisible(!modalVisible);
@@ -121,6 +139,9 @@ const LuxuryRideBooking = () => {
         keyExtractor={(item) => item.key}
         contentContainerStyle={{ paddingHorizontal: 40, paddingBottom: 30 }}
       />
+
+      {/* Toast Message */}
+      <Toast />
     </SafeAreaView>
   );
 };

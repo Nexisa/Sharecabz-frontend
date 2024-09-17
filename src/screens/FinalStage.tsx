@@ -81,13 +81,13 @@ const RideBookingScreen: React.FC<Props> = ({ navigation }) => {
       {/* Top Section */}
       <View className="bg-white rounded-xl p-6 mx-4 mt-16 mb-4 shadow-md">
         <TouchableOpacity 
-          className="absolute left-4 top-4 w-10 h-10 border border-gray-300 rounded-full items-center justify-center"
+          className="absolute left-2 top-5 w-10 h-10 items-center justify-center"
           onPress={() => navigation.goBack()}
         >
-          <Ionicons name="arrow-back" size={24} color="black" />
+          <Ionicons name="arrow-back" size={30} color="black" />
         </TouchableOpacity>
-        <Text className="text-lg font-bold mb-2 ml-12">Want to book on your own time?</Text>
-        <Text className="text-sm text-gray-500 mb-4 ml-12">
+        <Text className="text-lg font-bold mb-2 ml-8">Want to book on your own time?</Text>
+        <Text className="text-xs text-gray-500 mb-4 ml-8">
           If You want to book on your own time WhatsApp us
         </Text>
         <TouchableOpacity className="absolute right-6 top-6" onPress={handleWhatsAppPress}>
