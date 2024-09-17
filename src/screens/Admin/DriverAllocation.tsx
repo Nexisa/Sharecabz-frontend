@@ -6,8 +6,9 @@ import { Ionicons } from '@expo/vector-icons';
 const DriverAllocation = () => {
   const [driverName, setDriverName] = useState('');
   const [cabNumber, setCabNumber] = useState('');
+  const [DriverNumber, setDriverNumber] = useState('');
   const [cabModel, setCabModel] = useState('Innova Crysta, Xylo');
-  
+
   const navigation = useNavigation();
   const { width, height } = Dimensions.get('window'); // Get screen width and height dynamically
 
@@ -38,7 +39,7 @@ const DriverAllocation = () => {
       <Text className="text-lg font-semibold mb-2">Driver Name</Text>
       <TextInput
         className="border border-gray-300 rounded-lg p-4 mb-6 text-base"
-        placeholder="Enter the driver name"
+        placeholder="Enter the Driver Name"
         value={driverName}
         onChangeText={(text) => setDriverName(text)}
       />
@@ -47,16 +48,25 @@ const DriverAllocation = () => {
       <Text className="text-lg font-semibold mb-2">Cab Number</Text>
       <TextInput
         className="border border-gray-300 rounded-lg p-4 mb-6 text-base"
-        placeholder="Enter the cab number"
+        placeholder="Enter the Cab Number"
         value={cabNumber}
         onChangeText={(text) => setCabNumber(text)}
       />
+
+      <Text className="text-lg font-semibold mb-2">Driver's Contact No.</Text>
+      <TextInput
+        className="border border-gray-300 rounded-lg p-4 mb-6 text-base"
+        placeholder="Enter the Driver's Contact Number"
+        value={DriverNumber}
+        onChangeText={(text) => setDriverNumber(text)}
+      />
+
 
 
       <Text className="text-lg font-semibold mb-2">Cab Model</Text>
       <TextInput
         className="border border-gray-300 rounded-lg p-4 mb-8 text-base"
-        placeholder="Enter the cab model"
+        placeholder="Enter the Cab Model"
         value={cabModel}
         onChangeText={(text) => setCabModel(text)}
       />
