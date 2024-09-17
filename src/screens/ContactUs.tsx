@@ -13,8 +13,6 @@ const ContactUs: React.FC = () => {
   const navigation = useNavigation();
   const [modalVisible, setModalVisible] = useState(false);
 
-  const checkmarkIcon = require('../../assets/Images/checkmark-icon.png');
-
   const handleBackPress = () => {
       console.log('Back button pressed');
       navigation.goBack();

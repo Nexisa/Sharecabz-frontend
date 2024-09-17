@@ -62,11 +62,9 @@ const AdminHome = () => {
     console.log("Next button pressed");
   }
   return (
-    <SafeAreaView className="flex-1 p-5 pt-5" >
+    <ScrollView className="flex-1 p-5 pt-5" >
+      
       <View style={styles.header}>
-        <TouchableOpacity>
-          <Ionicons name="arrow-back" size={24} color="#000" />
-        </TouchableOpacity>
         <View style={styles.searchBar}>
           <Ionicons name="search" size={20} color="#999" />
           <Text style={styles.searchText}>Search By booking Id...</Text>
@@ -95,19 +93,9 @@ const AdminHome = () => {
         renderItem={renderItem}
         keyExtractor={(item, index) => `${item.bookingId}-${index}`}
       />
-
-      <View style={styles.footer}>
-        <TouchableOpacity style={styles.button} onPress={onPrevious}>
-          <Text style={styles.buttonTextPrevious}>Previous</Text>
-        </TouchableOpacity>
-        <TouchableOpacity
-          style={[styles.button, styles.nextButton]}
-          onPress={onNext}
-        >
-          <Text style={styles.buttonTextNext}>Next</Text>
-        </TouchableOpacity>
-      </View>
-    </SafeAreaView>
+    
+    </ScrollView>
+   
   );
 };
 /*
@@ -133,6 +121,7 @@ const styles = StyleSheet.create({
     padding: 10,
     borderBottomWidth: 1,
     borderBottomColor: "#eee",
+    marginTop: 20,
   },
   searchBar: {
     flex: 1,
@@ -187,34 +176,6 @@ const styles = StyleSheet.create({
   bookingId: {
     flex: 1,
     textAlign: "center",
-  },
-  footer: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    padding: 20,
-  },
-  button: {
-    paddingVertical: 10,
-    paddingHorizontal: 20,
-    borderRadius: 5,
-    backgroundColor: "#e0e0e0",
-    width: 150,
-    display: "flex",
-    justifyContent: "center",
-  },
-  nextButton: {
-    backgroundColor: "#81D742",
-    height: 50,
-  },
-  buttonTextNext: {
-    color: "#fff",
-    fontWeight: "bold",
-    alignSelf: "center",
-  },
-  buttonTextPrevious: {
-    color: "#000",
-    fontWeight: "bold",
-    alignSelf: "center",
   },
 });
 

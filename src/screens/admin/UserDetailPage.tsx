@@ -2,6 +2,7 @@ import React from 'react';
 import { View, Text, StyleSheet, Image, TouchableOpacity, TextInput, ScrollView } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
+
 const UserDetailPage = () => {
   const navigation = useNavigation();
   const handleBackPress = () => {
@@ -43,6 +44,10 @@ const UserDetailPage = () => {
         <TextInput style={styles.input} value="Lachung" editable={false} placeholder="Destination Location" />
         <Text style={styles.title}>Pickup Location</Text>
         <TextInput style={styles.input} value="Kazi Road power house" editable={false} placeholder="Pickup Location" />
+        <Text style={styles.title}>Date</Text>
+        <TextInput style={styles.input} value="20/09/2024" editable={false} />
+        <Text style={styles.title}>Time</Text>
+        <TextInput style={styles.input} value="07:00 AM" editable={false} />
         <Text style={styles.title}>Total Seats</Text>
         <TextInput style={styles.input} value="5" editable={false} placeholder="Total Seats" />
 
@@ -58,7 +63,7 @@ const UserDetailPage = () => {
             <Text style={styles.cancelButtonText}>Cancel</Text>
           </TouchableOpacity>
 
-          <TouchableOpacity style={styles.nextButton}>
+          <TouchableOpacity onPress={() => navigation.navigate("DriverAllocation" as never)} style={styles.nextButton}>
             <Text style={styles.nextButtonText}>Next Page</Text>
           </TouchableOpacity>
         </View>
