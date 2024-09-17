@@ -1,15 +1,15 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, Image, TouchableOpacity, Dimensions, ScrollView } from 'react-native';
+import { View, Text, TouchableOpacity, ScrollView, Image, Linking } from 'react-native';
 import { FontAwesome, Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
-import { Linking } from 'react-native';
+import DateTimePicker from '@react-native-community/datetimepicker';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { useDispatch, useSelector } from 'react-redux';
 import { updateField } from '../utils/JsonSlice';
 
 type RootStackParamList = {
   RideBookingScreen: undefined;
-
+  Booking: undefined;
 };
 
 type RideBookingScreenNavigationProp = StackNavigationProp<
@@ -22,31 +22,18 @@ interface Props {
 }
 
 const RideBookingScreen: React.FC<Props> = ({ navigation }) => {
-  const [seatData, setSeatData] = useState({
-    price: 0,
-    availableSeats: 0,
-    departureTime: '07:00',
-  });
   const [passengerCount, setPassengerCount] = useState(1);
-  
-  const dispatch = useDispatch();
-  const handleUpdate = (f:any,v:any) =>{
-  dispatch(updateField({ field: f, value: v })); 
-} 
-  const jsonData = useSelector((state:any) => state.jsonData.data); 
-   // Fetch data from backend on component mount
-  // useEffect(() => {
-  //   fetchSeatData();
-  // }, []);
+  const [selectedHour, setSelectedHour] = useState('07');
+  const [selectedMinute, setSelectedMinute] = useState('00');
+  const [selectedMeridiem, setSelectedMeridiem] = useState('AM');
+  const [showTimePicker, setShowTimePicker] = useState(false);
 
-  // const fetchSeatData = async () => {
-  //   try {
-  //     const response = await axios.get('YOUR_BACKEND_ENDPOINT'); // Update with backend API
-  //     setSeatData(response.data);
-  //   } catch (error) {
-  //     console.error('Error fetching seat data:', error);
-  //   }
-  // };
+  const dispatch = useDispatch();
+  const jsonData = useSelector((state: any) => state.jsonData.data);
+
+  const handleUpdate = (field: string, value: any) => {
+    dispatch(updateField({ field, value }));
+  };
 
   const handleWhatsAppPress = () => {
     const message = 'Hello, I want to book a ride!';
@@ -57,276 +44,154 @@ const RideBookingScreen: React.FC<Props> = ({ navigation }) => {
   };
 
   const incrementPassenger = () => {
-    setPassengerCount((prev) => (prev < 8 ? prev + 1 : prev));
-    handleUpdate('passengerno',passengerCount);
+    const newCount = passengerCount < 8 ? passengerCount + 1 : passengerCount;
+    setPassengerCount(newCount);
+    handleUpdate('passengerno', newCount);
   };
 
   const decrementPassenger = () => {
-    setPassengerCount((prev) => (prev > 1 ? prev - 1 : prev));
-    handleUpdate('passengerno',passengerCount);
+    const newCount = passengerCount > 1 ? passengerCount - 1 : passengerCount;
+    setPassengerCount(newCount);
+    handleUpdate('passengerno', newCount);
   };
 
-  const handelBookingConformation = () => {
-    navigation.navigate('Booking' as never); //Redirect To the Booking Conformation Page .....
-}
+  const onTimeChange = (event: any, selectedDate?: Date) => {
+    setShowTimePicker(false);
+    if (selectedDate) {
+      let hours = selectedDate.getHours();
+      let minutes = selectedDate.getMinutes();
+      
+      // Round minutes to nearest 15-minute interval
+      minutes = Math.round(minutes / 15) * 15;
+      if (minutes === 60) {
+        hours += 1;
+        minutes = 0;
+      }
+      
+      const ampm = hours >= 12 ? 'PM' : 'AM';
+      setSelectedHour((hours % 12 || 12).toString().padStart(2, '0'));
+      setSelectedMinute(minutes.toString().padStart(2, '0'));
+      setSelectedMeridiem(ampm);
+      handleUpdate('departureTime', `${selectedHour}:${selectedMinute} ${selectedMeridiem}`);
+    }
+  };
 
   return (
-    <ScrollView contentContainerStyle={styles.container}>
-      {/* Top Card with Back Button and WhatsApp Card */}
-      <View style={styles.topCardContainer}>
-      <TouchableOpacity style={styles.backButton} onPress={() => navigation.goBack()}>
-  <View style={styles.backButtonCircle}>
-    <Ionicons name="arrow-back" size={24} color="black" />
-  </View>
-</TouchableOpacity>
-
-        <View style={styles.topCard}>
-          <Text style={styles.topCardText}>Want to book on your own time?</Text>
-          <TouchableOpacity style={styles.whatsappButton} onPress={handleWhatsAppPress}>
-            <FontAwesome name="whatsapp" size={30} color="#25D366" />
-          </TouchableOpacity>
-        </View>
+    <ScrollView className="flex-1 bg-gray-100">
+      {/* Top Section */}
+      <View className="bg-white rounded-xl p-6 mx-4 mt-16 mb-4 shadow-md">
+        <TouchableOpacity 
+          className="absolute left-4 top-4 w-10 h-10 border border-gray-300 rounded-full items-center justify-center"
+          onPress={() => navigation.goBack()}
+        >
+          <Ionicons name="arrow-back" size={24} color="black" />
+        </TouchableOpacity>
+        <Text className="text-lg font-bold mb-2 ml-12">Want to book on your own time?</Text>
+        <Text className="text-sm text-gray-500 mb-4 ml-12">
+          If You want to book on your own time WhatsApp us
+        </Text>
+        <TouchableOpacity className="absolute right-6 top-6" onPress={handleWhatsAppPress}>
+          <FontAwesome name="whatsapp" size={30} color="#25D366" />
+        </TouchableOpacity>
       </View>
 
-      {/* Ride Information Card */}
-      <View style={styles.infoCard}>
-        <LinearGradient colors={['#84FAB0', '#8FD3F4']} style={styles.gradientBox}>
-          <Text style={styles.routeText}>{jsonData.source.label}</Text>
+      {/* Ride Info Card */}
+      <View className="bg-white rounded-xl p-4 mx-4 shadow-md">
+        <LinearGradient
+          colors={['#84FAB0', '#8FD3F4']}
+          className="flex-row justify-between items-center p-6 rounded-lg mb-4"
+        >
+          <Text className="text-lg font-bold">{jsonData.source.label}</Text>
           <FontAwesome name="bus" size={24} color="black" />
-          <Text style={styles.routeText}>{jsonData.destination.label}</Text>
-          <Text style={styles.timeText}>2 hrs</Text>
+          <Text className="text-lg font-bold">{jsonData.destination.label}</Text>
+          <Text className="text-sm font-light">2 hrs</Text>
         </LinearGradient>
 
-        {/* Seat Data */}
-        <View style={styles.dataRow}>
-          <Text style={styles.dataLabel}>Seats Starting from:</Text>
-          <Text style={styles.dataValue}>Rs. {seatData.price}</Text>
-        </View>
-        <View style={styles.dataRow}>
-          <Text style={styles.dataLabel}>Available Seats:</Text>
-          <Text style={styles.dataValue}>{seatData.availableSeats}</Text>
-        </View>
-        <View style={styles.dataRow}>
-          <Text style={styles.dataLabel}>Departure Time:</Text>
-          <Text style={styles.dataValue}>{seatData.departureTime}</Text>
-        </View>
+        {/* Ride Details */}
+        <View className="mb-4">
+          <View className="flex-row justify-between mb-2">
+            <Text className="text-sm text-gray-600">Seats Starting from:</Text>
+            <Text className="text-sm font-bold">Rs. 1000</Text>
+          </View>
 
-        {/* Passenger Count */}
-        <View style={styles.passengerRow}>
-          <Text style={styles.dataLabel}>No. of Passengers:</Text>
-          <View style={styles.passengerControl}>
-            <TouchableOpacity onPress={decrementPassenger} style={styles.passengerButton}>
-              <Ionicons name="remove" size={24} color="black" />
-            </TouchableOpacity>
-            <Text style={styles.passengerCount}>{passengerCount}</Text>
-            <TouchableOpacity onPress={incrementPassenger} style={styles.passengerButton}>
-              <Ionicons name="add" size={24} color="black" />
+          <View className="flex-row justify-between mb-4">
+            <Text className="text-sm text-gray-600">Available Seats:</Text>
+            <Text className="text-sm font-bold">8</Text>
+          </View>
+
+          <View className="flex-row justify-between items-center mb-4">
+            <Text className="text-sm text-gray-600">Departure Time:</Text>
+            <TouchableOpacity
+              className="border border-gray-300 p-2 rounded-md"
+              onPress={() => setShowTimePicker(true)}
+            >
+              <Text className="text-sm">{`${selectedHour}:${selectedMinute} ${selectedMeridiem}`}</Text>
             </TouchableOpacity>
           </View>
-        </View>
 
-        {/* Car Image */}
-        <View style={styles.carImageContainer}>
-          <Image source={require('../../assets/Images/car1.png')} style={styles.carImage} />
-          <Image source={require('../../assets/Images/car2.png')} style={styles.carImage} />
-        </View>
-        <Text style={styles.availabilityText}>
-  Either a Xylo or Innova will be sent according to availability
-</Text>
+          {showTimePicker && (
+            <DateTimePicker
+              value={new Date()}
+              mode="time"
+              is24Hour={false}
+              display="spinner"
+              onChange={onTimeChange}
+              minuteInterval={15}
+            />
+          )}
 
-        {/* Features Section */}
-        <View style={styles.featuresContainer}>
-          <View style={styles.row}>
-            <View style={styles.featureItem}>
-              <FontAwesome name="snowflake-o" size={24} color="black" />
-              <Text style={styles.featureText}>Air Conditioned</Text>
-            </View>
-            <View style={styles.featureItem}>
-              <Ionicons name="fast-food-outline" size={24} color="black" />
-              <Text style={styles.featureText}>Travel Snacks</Text>
+          <View className="flex-row justify-between items-center">
+            <Text className="text-sm text-gray-600">No. of Passengers:</Text>
+            <View className="flex-row items-center">
+              <TouchableOpacity onPress={decrementPassenger} className="bg-gray-200 p-2 rounded-full">
+                <Ionicons name="remove" size={24} color="black" />
+              </TouchableOpacity>
+              <Text className="mx-4 text-lg font-bold">{passengerCount}</Text>
+              <TouchableOpacity onPress={incrementPassenger} className="bg-gray-200 p-2 rounded-full">
+                <Ionicons name="add" size={24} color="black" />
+              </TouchableOpacity>
             </View>
           </View>
-
-          {/* Luggage Feature */}
-          <View style={styles.featureItemCenter}>
-            <FontAwesome name="suitcase" size={24} color="black" />
-            <Text style={styles.featureText}>1 Trolley & 1 Handbag per Seat</Text>
-          </View>
-
-          <Text style={styles.windowSeatNote}>
-            *Window seat price may be different
-          </Text>
         </View>
+
+        {/* Car Images */}
+        <Text className="text-xs text-gray-500 text-center mb-4">
+          Either a Xylo or Innova will be sent according to availability
+        </Text>
+        <View className="flex-row justify-around mb-4">
+          <Image source={require('../../assets/Images/car1.png')} className="w-20 h-16 my-4" />
+          <Image source={require('../../assets/Images/car2.png')} className="w-20 h-16 my-4" />
+        </View>
+
+        {/* Features */}
+        <View className="flex-row justify-around mb-4">
+          <View className="flex items-center">
+            <FontAwesome name="snowflake-o" size={24} color="black" />
+            <Text className="text-sm mt-1">Air Conditioned</Text>
+          </View>
+          <View className="flex items-center">
+            <Ionicons name="fast-food-outline" size={24} color="black" />
+            <Text className="text-sm mt-1">Travel Snacks</Text>
+          </View>
+        </View>
+        <View className="flex items-center mb-4">
+          <FontAwesome name="suitcase" size={24} color="black" />
+          <Text className="text-sm mt-1">1 Trolley & 1 Handbag per seat</Text>
+        </View>
+
+        {/* Window Seat Note */}
+        <Text className="text-xs text-red-600 text-center mb-4">*Window seat price may be different</Text>
 
         {/* Done Button */}
-        <TouchableOpacity onPress = {handelBookingConformation} style={styles.doneButton}>
-          <Text style={styles.doneButtonText}>DONE</Text>
+        <TouchableOpacity
+          onPress={() => navigation.navigate('Booking')}
+          className="bg-[#8CC63F] py-3 px-10 rounded-full items-center"
+        >
+          <Text className="text-white font-bold text-lg">DONE</Text>
         </TouchableOpacity>
       </View>
     </ScrollView>
   );
 };
-
-const styles = StyleSheet.create({
-  container: {
-    flexGrow: 1,
-    padding: 10,
-    alignItems: 'center',
-  },
-  topCardContainer: {
-    width: '100%',
-    marginTop: 40,
-    marginBottom: 20,
-    backgroundColor: '#fff',
-    borderRadius: 15,
-    padding: 40,
-    elevation: 5,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.2,
-    shadowRadius: 4,
-  },
-  topCard: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-  },
-  topCardText: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    marginLeft: 25,
-  },
-  whatsappButton: {
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  backButton: {
-    position: 'absolute',
-    top: 35,
-    left: 15,
-  },
-  backButtonCircle: {
-    width: 40,
-    height: 40,
-    borderRadius: 15,
-    borderWidth: 1,
-    borderColor: 'black',
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: '#fff',
-
-  },
-  infoCard: {
-    backgroundColor: '#fff',
-    borderRadius: 20,
-    padding: 20,
-    width: '100%',
-    marginBottom: 20,
-  },
-  gradientBox: {
-    flexDirection: 'row',
-    justifyContent: 'space-around',
-    alignItems: 'center',
-    paddingVertical: 20,
-    borderRadius: 10,
-    marginBottom: 15,
-  },
-  routeText: {
-    fontSize: 16,
-    fontWeight: 'bold',
-  },
-  timeText: {
-    fontSize: 12,
-    fontWeight: '300',
-  },
-  dataRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    paddingVertical: 10,
-  },
-  dataLabel: {
-    fontSize: 16,
-  },
-  dataValue: {
-    fontSize: 16,
-    fontWeight: 'bold',
-  },
-  passengerRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    paddingVertical: 10,
-  },
-  passengerControl: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  passengerButton: {
-    backgroundColor: '#F0F0F0',
-    padding: 10,
-    borderRadius: 20,
-  },
-  passengerCount: {
-    marginHorizontal: 10,
-    fontSize: 18,
-  },
-  carImageContainer: {
-    flexDirection: 'row',
-    justifyContent: 'space-around',
-    marginVertical: 15,
-  },
-  carImage: {
-    width: 100,
-    height: 70,
-    resizeMode: 'contain',
-  },
-  availabilityText: {
-    fontSize: 24, 
-    color: '#333', 
-    textAlign: 'center', 
-    marginVertical: 10, 
-  },
-  featuresContainer: {
-    marginVertical: 20,
-    alignItems: 'center',
-  },
-  row: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    width: '80%',
-    marginBottom: 10,
-  },
-  featureItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  featureItemCenter: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginBottom: 10,
-  },
-  featureText: {
-    marginLeft: 10,
-    fontSize: 16,
-  },
-  windowSeatNote: {
-    color: 'red',
-    fontSize: 12,
-    marginTop: 10,
-  },
-  doneButton: {
-    backgroundColor: '#8CC63F',
-    paddingVertical: 15,
-    borderRadius: 25,
-    alignItems: 'center',
-    marginTop: 20,
-  },
-  doneButtonText: {
-    color: '#fff',
-    fontSize: 18,
-    fontWeight: 'bold',
-  },
-});
 
 export default RideBookingScreen;

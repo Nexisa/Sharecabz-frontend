@@ -52,7 +52,7 @@ const TripDetailsScreen = () => {
 
       {/* Trip Details */}
       <View
-        style={{ top: height * 0.5 }} // Adjusted to lift the card higher
+        style={{ top: height * 0.5 }} 
         className="absolute bg-white bg-opacity-80 rounded-xl p-5 mx-5 w-11/12 justify-center items-center"
       >
         <Text className="text-2xl font-bold mb-4">Trip Details</Text>
