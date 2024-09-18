@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { View, Text, TextInput, TouchableOpacity, Image } from 'react-native';
 import { StackNavigationProp } from '@react-navigation/stack';
 import Toast from 'react-native-toast-message';
-import OTPInput from '../components/OTPInput'; 
+import OTPInput from '../components/OTPInput';
 
 type RootStackParamList = {
   SignIn: undefined;
@@ -58,6 +58,7 @@ const SignUpScreen: React.FC<Props> = ({ navigation }) => {
   const validateForm = () => {
     const { username, phoneNumber, email, otp1, otp2, otp3, otp4, password, confirmPassword } = formData;
 
+    // Validate if all fields are filled
     if (!username || !phoneNumber || !email || !otp1 || !otp2 || !otp3 || !otp4 || !password || !confirmPassword) {
       Toast.show({
         type: 'error',
@@ -67,21 +68,48 @@ const SignUpScreen: React.FC<Props> = ({ navigation }) => {
       });
       return false;
     }
+
+    const nameRegex = /^[A-Za-z ]+$/;
+    if (!nameRegex.test(username)) {
+      Toast.show({
+        type: 'error',
+        position: 'top',
+        text1: 'Invalid Username',
+        text2: 'Username should contain only letters and spaces',
+      });
+      return false;
+    }
+
+
+    const phoneRegex = /^[0-9]+$/;
+    if (!phoneRegex.test(phoneNumber)) {
+      Toast.show({
+        type: 'error',
+        position: 'top',
+        text1: 'Invalid Phone Number',
+        text2: 'Phone number should contain only numbers (0-9)',
+      });
+      return false;
+    }
+
+
+    if (!isValidEmail(email)) {
+      Toast.show({
+        type: 'error',
+        position: 'top',
+        text1: 'Invalid Email',
+        text2: 'Invalid email address',
+      });
+      return false;
+    }
+
+
     if (password !== confirmPassword) {
       Toast.show({
         type: 'error',
         position: 'top',
         text1: 'Error',
         text2: 'Passwords do not match',
-      });
-      return false;
-    }
-    if (!isValidEmail(email)) {
-      Toast.show({
-        type: 'error',
-        position: 'top',
-        text1: 'Error',
-        text2: 'Invalid email address',
       });
       return false;
     }
