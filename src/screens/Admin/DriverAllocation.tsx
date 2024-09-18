@@ -1,25 +1,51 @@
 import React, { useState } from 'react';
-import { View, Text, TextInput, TouchableOpacity, Dimensions } from 'react-native';
+import { View, Text, TextInput, TouchableOpacity, Dimensions, Alert, Modal, Button } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { Ionicons } from '@expo/vector-icons';
+import Toast from 'react-native-toast-message';
 
 const DriverAllocation = () => {
   const [driverName, setDriverName] = useState('');
   const [cabNumber, setCabNumber] = useState('');
-  const [DriverNumber, setDriverNumber] = useState('');
-  const [cabModel, setCabModel] = useState('Innova Crysta, Xylo');
+  const [driverNumber, setDriverNumber] = useState('');
+  const [cabModel, setCabModel] = useState('Innova Crysta');
+  const [isDropdownVisible, setIsDropdownVisible] = useState(false);
 
   const navigation = useNavigation();
   const { width, height } = Dimensions.get('window'); // Get screen width and height dynamically
 
   const handleDriverAllocation = () => {
+    if (!driverName || !cabNumber || !driverNumber || !cabModel) {
+      Toast.show({
+        type: 'error',
+        position: 'top',
+        text1: 'Incomplete Form',
+        text2: 'Please fill all the fields before proceeding.',
+      });
+      return;
+    }
+
     console.log('Driver allocated:', driverName, cabNumber, cabModel);
-    navigation.navigate('Status' as never);// Redirect to Driver Allotment Status
+    navigation.navigate('Status' as never); // Redirect to Driver Allotment Status
   };
 
   const handleCancelBooking = () => {
     console.log('Booking cancelled');
-    navigation.navigate('AdminHome' as never);// Redirect to Driver Booking Details
+    navigation.navigate('AdminHome' as never); // Redirect to Driver Booking Details
+  };
+
+  const handleDriverNumberChange = (text: string) => {
+    // Allow only numeric characters
+    if (/^\d*$/.test(text)) {
+      setDriverNumber(text);
+    } else {
+      Toast.show({
+        type: 'error',
+        position: 'top',
+        text1: 'Invalid Input',
+        text2: 'Please enter only numeric values for contact number.',
+      });
+    }
   };
 
   const goBack = () => {
@@ -35,7 +61,6 @@ const DriverAllocation = () => {
 
       <Text className="text-3xl font-bold text-center mb-10">Driver Details</Text>
 
-
       <Text className="text-lg font-semibold mb-2">Driver Name</Text>
       <TextInput
         className="border border-gray-300 rounded-lg p-4 mb-6 text-base"
@@ -43,7 +68,6 @@ const DriverAllocation = () => {
         value={driverName}
         onChangeText={(text) => setDriverName(text)}
       />
-
 
       <Text className="text-lg font-semibold mb-2">Cab Number</Text>
       <TextInput
@@ -57,28 +81,53 @@ const DriverAllocation = () => {
       <TextInput
         className="border border-gray-300 rounded-lg p-4 mb-6 text-base"
         placeholder="Enter the Driver's Contact Number"
-        value={DriverNumber}
-        onChangeText={(text) => setDriverNumber(text)}
+        value={driverNumber}
+        onChangeText={handleDriverNumberChange}
+        keyboardType="numeric"
       />
-
-
 
       <Text className="text-lg font-semibold mb-2">Cab Model</Text>
-      <TextInput
-        className="border border-gray-300 rounded-lg p-4 mb-8 text-base"
-        placeholder="Enter the Cab Model"
-        value={cabModel}
-        onChangeText={(text) => setCabModel(text)}
-      />
+      <TouchableOpacity
+        className="border border-gray-300 rounded-lg p-4 pb-6 mb-6 text-base"
+        onPress={() => setIsDropdownVisible(true)}
+      >
+        <Text>{cabModel}</Text>
+      </TouchableOpacity>
 
+      <Modal
+        transparent={true}
+        visible={isDropdownVisible}
+        onRequestClose={() => setIsDropdownVisible(false)}
+      >
+        <View className="flex-1 justify-center items-center bg-black opacity-80">
+          <View className="bg-white rounded-xl p-8">
+            <Text className="text-xl font-bold mb-4">Select Cab Model</Text>
+            {['Innova Crysta', 'Xylo'].map(model => (
+              <TouchableOpacity
+                key={model}
+                className="p-4 border-b border-gray-300"
+                onPress={() => {
+                  setCabModel(model);
+                  setIsDropdownVisible(false);
+                }}
+              >
+                <Text className="text-base">{model}</Text>
+              </TouchableOpacity>
+            ))}
+            <Button title="Cancel" onPress={() => setIsDropdownVisible(false)} />
+          </View>
+        </View>
+      </Modal>
 
       <View className="flex-row justify-between mt-4">
         <TouchableOpacity
-          className="flex-1 bg-green-400 rounded-lg py-4 mr-2"
+          className={`flex-1 rounded-lg py-4 mr-2 ${driverName && cabNumber && driverNumber && cabModel ? 'bg-green-400' : 'bg-gray-300'}`}
           onPress={handleDriverAllocation}
-          style={{ backgroundColor: 'rgba(129, 215, 66, 1)' }} 
+          disabled={!driverName || !cabNumber || !driverNumber || !cabModel}
         >
-          <Text className="text-white text-lg font-bold text-center">Allocate Driver</Text>
+          <Text className={`text-white text-lg font-bold text-center ${driverName && cabNumber && driverNumber && cabModel ? 'text-white' : 'text-gray-500'}`}>
+            Allocate Driver
+          </Text>
         </TouchableOpacity>
 
         <TouchableOpacity
