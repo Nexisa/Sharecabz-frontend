@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useRef, useState } from 'react';
 import { useNavigation } from '@react-navigation/native';
 import {
   View,
@@ -7,7 +7,9 @@ import {
   TouchableOpacity,
   StyleSheet,
   Alert,
+  KeyboardAvoidingView,
 } from 'react-native';
+import Toast from 'react-native-toast-message';
 
 const ForgetPasswordScreen = () => {
   const [email, setEmail] = useState('');
@@ -16,12 +18,21 @@ const ForgetPasswordScreen = () => {
   const [confirmPassword, setConfirmPassword] = useState('');
 
   const navigation = useNavigation();
+
+  const inputRefs = useRef<(TextInput | null)[]>([]); // Refs for code inputs
+
+  const showToast = (message: string) => {
+    Toast.show({
+      type: 'error',
+      text1: message,
+    });
+  };
+
   const handleEmailSubmit = () => {
-    // Validate email here and send verification code
     if (!email) {
-      Alert.alert('Please enter an email');
+      showToast('Please enter an email');
     } else {
-      Alert.alert('Verification code sent to email');
+      showToast('Verification code sent to email');
     }
   };
 
@@ -29,28 +40,38 @@ const ForgetPasswordScreen = () => {
     const updatedCode = [...code];
     updatedCode[index] = value;
     setCode(updatedCode);
+
+    if (value && index < 3) {
+      inputRefs.current[index + 1]?.focus(); // Move to next input
+    }
   };
 
   const handleCodeSend = () => {
-    Alert.alert('Verification code verified');
-  }
+    if (code.includes('')) {
+      showToast('Please enter the complete verification code');
+    } else {
+      showToast('Verification code verified');
+    }
+  };
 
   const handlePasswordReset = () => {
+    if (!newPassword || !confirmPassword) {
+      showToast('Please fill out both password fields');
+      return;
+    }
     if (newPassword !== confirmPassword) {
-      Alert.alert("Passwords don't match");
+      showToast("Passwords don't match");
       return;
     }
     // Add further validation if needed
-    Alert.alert('Password reset successfully');
+    showToast('Password reset successfully');
   };
 
   return (
     <View style={styles.container}>
-      <View style={styles.header} />
 
       <View style={styles.cardContainer}>
         <Text style={styles.title}>Update Your Password</Text>
-        
 
         <TextInput
           style={styles.input}
@@ -63,14 +84,13 @@ const ForgetPasswordScreen = () => {
           <Text style={styles.buttonText}>NEXT</Text>
         </TouchableOpacity>
 
-        
         <Text style={styles.verificationText}>Enter Verification Code</Text>
-        
 
         <View style={styles.codeContainer}>
           {code.map((digit, index) => (
             <TextInput
               key={index}
+              ref={(el) => (inputRefs.current[index] = el)}
               style={styles.codeInput}
               keyboardType="numeric"
               maxLength={1}
@@ -81,7 +101,10 @@ const ForgetPasswordScreen = () => {
         </View>
 
         <TouchableOpacity style={styles.resend}>
-          <Text style={styles.receivedText}>If you didn't receive a code, <Text style={styles.resendText}>Resend </Text> </Text>
+          <Text style={styles.receivedText}>
+            If you didn't receive a code,{' '}
+            <Text style={styles.resendText}>Resend</Text>
+          </Text>
         </TouchableOpacity>
 
         <TouchableOpacity style={styles.button} onPress={handleCodeSend}>
@@ -108,12 +131,16 @@ const ForgetPasswordScreen = () => {
           <Text style={styles.buttonText}>DONE</Text>
         </TouchableOpacity>
 
-        <TouchableOpacity style={styles.signup} onPress={() => navigation.navigate('SignUp' as never)}>
+        <TouchableOpacity
+          style={styles.signup}
+          onPress={() => navigation.navigate('SignUp' as never)}
+        >
           <Text style={styles.signupText}>
             Don't have an account? <Text style={styles.signupLink}>SIGN UP</Text>
           </Text>
         </TouchableOpacity>
       </View>
+      <Toast />
     </View>
   );
 };
@@ -121,9 +148,9 @@ const ForgetPasswordScreen = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#81D742', 
-    justifyContent: 'center',    
-    alignItems: 'center',   
+    backgroundColor: '#81D742',
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   header: {
     position: 'absolute',
@@ -136,9 +163,9 @@ const styles = StyleSheet.create({
     borderBottomRightRadius: 30,
     zIndex: -1,
   },
-  cardContainer:{
+  cardContainer: {
     width: '90%',
-    maxWidth: 400, 
+    maxWidth: 400,
     backgroundColor: '#fff',
     borderRadius: 10,
     paddingLeft: 20,
@@ -181,7 +208,7 @@ const styles = StyleSheet.create({
     fontSize: 12,
   },
   verificationText: {
-    fontWeight:"600",
+    fontWeight: '600',
   },
   codeContainer: {
     flexDirection: 'row',
@@ -197,13 +224,12 @@ const styles = StyleSheet.create({
     borderRadius: 5,
     textAlign: 'center',
     fontSize: 18,
-    
   },
   resend: {
     alignSelf: 'center',
     marginBottom: 20,
   },
-  receivedText:{
+  receivedText: {
     color: 'grey',
   },
   resendText: {

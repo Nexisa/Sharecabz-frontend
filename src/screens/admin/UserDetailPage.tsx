@@ -80,27 +80,27 @@ const UserDetailPage = () => {
         <TextInput style={styles.input} value={userDetails.phone} editable={false} />
         
         <Text style={styles.title}>Source Location</Text>
-        <TextInput style={styles.input} value={userDetails.sourceLocation} editable={false} placeholder="Source Location" />
+        <TextInput style={styles.input} value={userDetails.sourceLocation} editable={false} />
         
         <Text style={styles.title}>Destination Location</Text>
-        <TextInput style={styles.input} value={userDetails.destinationLocation} editable={false} placeholder="Destination Location" />
+        <TextInput style={styles.input} value={userDetails.destinationLocation} editable={false} />
         
         <Text style={styles.title}>Pickup Location</Text>
-        <TextInput style={styles.input} value={userDetails.pickupLocation} editable={false} placeholder="Pickup Location" />
+        <TextInput style={styles.input} value={userDetails.pickupLocation} editable={false} />
         
         <Text style={styles.title}>Date</Text>
-        <TextInput style={styles.input} value={userDetails.date} editable={false} />
+        <TextInput style={styles.input} value={userDetails.date} editable={false}/>
         
         <Text style={styles.title}>Time</Text>
-        <TextInput style={styles.input} value={userDetails.time} editable={false} />
+        <TextInput style={styles.input} value={userDetails.time} editable={false}/>
         
         <Text style={styles.title}>Total Seats</Text>
-        <TextInput style={styles.input} value={userDetails.totalSeats} editable={false} placeholder="Total Seats" />
+        <TextInput style={styles.input} value={userDetails.totalSeats} editable={false} />
 
         {/* Payment Status */}
         <View style={styles.statusContainer}>
           <Text style={styles.statusLabel}>Payment Status</Text>
-          <Text style={styles.statusCompleted}>{userDetails.paymentStatus}</Text>
+          <Text style={styles.statusCompleted}>Completed{userDetails.paymentStatus}</Text>
         </View>
 
         {/* Buttons */}
