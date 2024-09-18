@@ -118,7 +118,7 @@ const SignInScreen: React.FC<Props> = () => {
           <Text className="text-white font-bold">SIGN IN</Text>
         </TouchableOpacity>
 
-        <View className="items-center my-8">
+        {/* <View className="items-center my-8">
           <Text className="text-gray-500 mb-4">Or Sign in with</Text>
           <View className="flex-row justify-between w-44">
             <TouchableOpacity>
@@ -128,7 +128,7 @@ const SignInScreen: React.FC<Props> = () => {
               <FontAwesome name="facebook" size={24} color="#3b5998" />
             </TouchableOpacity>
           </View>
-        </View>
+        </View> */}
 
         <TouchableOpacity onPress={() => navigation.navigate('SignUp' as never)}>
           <Text className="text-center mt-5 text-gray-500">

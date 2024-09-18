@@ -1,11 +1,12 @@
 import React, { useState } from 'react';
-import { View, Text, TouchableOpacity, ScrollView, Image, Linking } from 'react-native';
+import { View, Text, TouchableOpacity, ScrollView, Image } from 'react-native';
 import { FontAwesome, Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
-import DateTimePicker from '@react-native-community/datetimepicker';
+import DateTimePicker, { DateTimePickerEvent } from '@react-native-community/datetimepicker';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { useDispatch, useSelector } from 'react-redux';
 import { updateField } from '../utils/JsonSlice';
+import ProfileModal from '../components/ProfileModal';
 
 type RootStackParamList = {
   RideBookingScreen: undefined;
@@ -27,20 +28,13 @@ const RideBookingScreen: React.FC<Props> = ({ navigation }) => {
   const [selectedMinute, setSelectedMinute] = useState('00');
   const [selectedMeridiem, setSelectedMeridiem] = useState('AM');
   const [showTimePicker, setShowTimePicker] = useState(false);
+  const [modalVisible, setModalVisible] = useState(false);
 
   const dispatch = useDispatch();
   const jsonData = useSelector((state: any) => state.jsonData.data);
 
   const handleUpdate = (field: string, value: any) => {
     dispatch(updateField({ field, value }));
-  };
-
-  const handleWhatsAppPress = () => {
-    const message = 'Hello, I want to book a ride!';
-    const url = `whatsapp://send?text=${encodeURIComponent(message)}`;
-    Linking.openURL(url).catch(() => {
-      alert('Make sure WhatsApp is installed on your device.');
-    });
   };
 
   const incrementPassenger = () => {
@@ -55,7 +49,7 @@ const RideBookingScreen: React.FC<Props> = ({ navigation }) => {
     handleUpdate('passengerno', newCount);
   };
 
-  const onTimeChange = (event: any, selectedDate?: Date) => {
+  const onTimeChange = (event: DateTimePickerEvent, selectedDate?: Date) => {
     setShowTimePicker(false);
     if (selectedDate) {
       let hours = selectedDate.getHours();
@@ -69,34 +63,40 @@ const RideBookingScreen: React.FC<Props> = ({ navigation }) => {
       }
       
       const ampm = hours >= 12 ? 'PM' : 'AM';
-      setSelectedHour((hours % 12 || 12).toString().padStart(2, '0'));
-      setSelectedMinute(minutes.toString().padStart(2, '0'));
+      const newHour = (hours % 12 || 12).toString().padStart(2, '0');
+      const newMinute = minutes.toString().padStart(2, '0');
+      setSelectedHour(newHour);
+      setSelectedMinute(newMinute);
       setSelectedMeridiem(ampm);
-      handleUpdate('departureTime', `${selectedHour}:${selectedMinute} ${selectedMeridiem}`);
+      handleUpdate('departureTime', `${newHour}:${newMinute} ${ampm}`);
     }
+  };
+
+  const handleBackPress = () => {
+    console.log('Back button pressed');
+    navigation.goBack();
+  };
+
+  const toggleProfileModal = () => {
+    console.log('Toggling profile modal. Current state:', modalVisible);
+    setModalVisible(!modalVisible);
   };
 
   return (
     <ScrollView className="flex-1 bg-gray-100">
       {/* Top Section */}
-      <View className="bg-white rounded-xl p-6 mx-4 mt-16 mb-4 shadow-md">
-        <TouchableOpacity 
-          className="absolute left-2 top-5 w-10 h-10 items-center justify-center"
-          onPress={() => navigation.goBack()}
-        >
-          <Ionicons name="arrow-back" size={30} color="black" />
+      <View className="flex-row justify-between items-center mb-4 bg-white rounded-xl p-6 shadow-md">
+        <TouchableOpacity onPress={handleBackPress} className="p-2 mt-8">
+          <Ionicons name="arrow-back" size={24} color="black" />
         </TouchableOpacity>
-        <Text className="text-lg font-bold mb-2 ml-8">Want to book on your own time?</Text>
-        <Text className="text-xs text-gray-500 mb-4 ml-8">
-          If You want to book on your own time WhatsApp us
-        </Text>
-        <TouchableOpacity className="absolute right-6 top-6" onPress={handleWhatsAppPress}>
-          <FontAwesome name="whatsapp" size={30} color="#25D366" />
+
+        <TouchableOpacity onPress={toggleProfileModal} className=" mt-4">
+          <ProfileModal modalVisible={modalVisible} toggleModal={toggleProfileModal} />
         </TouchableOpacity>
       </View>
 
       {/* Ride Info Card */}
-      <View className="bg-white rounded-xl p-4 mx-4 shadow-md">
+      <View className="bg-white rounded-xl p-4 mx-8 mb-8 mt-12 shadow-md">
         <LinearGradient
           colors={['#84FAB0', '#8FD3F4']}
           className="flex-row justify-between items-center p-6 rounded-lg mb-4"
@@ -108,21 +108,21 @@ const RideBookingScreen: React.FC<Props> = ({ navigation }) => {
         </LinearGradient>
 
         {/* Ride Details */}
-        <View className="mb-4">
-          <View className="flex-row justify-between mb-2">
+        <View className="space-y-8">
+          <View className="flex-row justify-between">
             <Text className="text-sm text-gray-600">Seats Starting from:</Text>
             <Text className="text-sm font-bold">Rs. 1000</Text>
           </View>
 
-          <View className="flex-row justify-between mb-4">
+          <View className="flex-row justify-between">
             <Text className="text-sm text-gray-600">Available Seats:</Text>
             <Text className="text-sm font-bold">8</Text>
           </View>
 
-          <View className="flex-row justify-between items-center mb-4">
+          <View className="flex-row justify-between items-center">
             <Text className="text-sm text-gray-600">Departure Time:</Text>
             <TouchableOpacity
-              className="border border-gray-300 p-2 rounded-md"
+              className="border border-gray-300 px-4 py-2 rounded-md"
               onPress={() => setShowTimePicker(true)}
             >
               <Text className="text-sm">{`${selectedHour}:${selectedMinute} ${selectedMeridiem}`}</Text>
@@ -155,12 +155,12 @@ const RideBookingScreen: React.FC<Props> = ({ navigation }) => {
         </View>
 
         {/* Car Images */}
-        <Text className="text-xs text-gray-500 text-center mb-4">
+        <Text className="text-xs text-gray-500 text-center my-8">
           Either a Xylo or Innova will be sent according to availability
         </Text>
         <View className="flex-row justify-around mb-4">
-          <Image source={require('../../assets/Images/car1.png')} className="w-20 h-16 my-4" />
-          <Image source={require('../../assets/Images/car2.png')} className="w-20 h-16 my-4" />
+          <Image source={require('../../assets/Images/car1.png')} className="w-24 h-16" />
+          <Image source={require('../../assets/Images/car2.png')} className="w-24 h-16" />
         </View>
 
         {/* Features */}
