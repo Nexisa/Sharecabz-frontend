@@ -76,7 +76,7 @@ const DriverAllocation = () => {
         <TouchableOpacity
           className="flex-1 bg-green-400 rounded-lg py-4 mr-2"
           onPress={handleDriverAllocation}
-          style={{ backgroundColor: 'rgba(129, 215, 66, 1)' }} // Dynamic color
+          style={{ backgroundColor: 'rgba(129, 215, 66, 1)' }} 
         >
           <Text className="text-white text-lg font-bold text-center">Allocate Driver</Text>
         </TouchableOpacity>

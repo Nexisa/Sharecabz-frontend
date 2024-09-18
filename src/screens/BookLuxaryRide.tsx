@@ -92,35 +92,60 @@ const LuxuryRideBooking = () => {
     { key: 'dropdown-destination', component: <Dropdowncom label="Select destination location" iconname="location-crosshairs" color="red" data={destination} onSelect={(item) => handleUpdate('destination', item)} focusColor="#81D742" /> },
     { key: 'dropdown-pickup', component: <Dropdowncom label="Select pickup point" iconname="truck-pickup" color="black" data={pickupPoints} onSelect={(item) => handleUpdate('pickupPoint', item)} focusColor="#81D742" /> },
     { key: 'date-text', component: <Text className="mt-8 mb-2">Select your departure date: {jsonData.date}</Text> },
+
+  
     { key: 'calendar', component: (
-        <View className="bg-white border border-gray-300 rounded-lg overflow-hidden mb-10 mt-4">
+        <View style={{ 
+          backgroundColor: 'white', 
+          borderWidth: 1, 
+          borderColor: 'gray', 
+          borderRadius: 10, 
+          marginBottom: 40, 
+          marginTop: 16, 
+          width: width * 0.8,   
+          alignSelf: 'center',
+          height: width * 0.65,  
+          maxWidth: width,
+        }}>
           <CalendarPicker
             onDateChange={handleDateChange}
-            width={width * 0.7}
+            width={width * 0.8}  
             selectedDayColor="#4CAF50"
             selectedDayTextColor="#FFFFFF"
             todayBackgroundColor="#E8E8E8"
             textStyle={{ color: '#000000' }}
-            dayLabelsWrapper={{ backgroundColor: '#81D74270', borderRadius: 5 }}
+            dayLabelsWrapper={{ backgroundColor: '#81D74270', borderRadius: 4 }}
             monthTitleStyle={{ color: '#000000', fontSize: 18, fontWeight: 'bold' }}
             yearTitleStyle={{ color: '#000000', fontSize: 18, fontWeight: 'bold' }}
             previousComponent={<IIcon name="angle-left" size={28} color="green" style={{ marginLeft: 10 }} />}
             nextComponent={<IIcon name="angle-right" size={28} color="green" style={{ marginRight: 10 }} />}
           />
-        </View>
+        </View> 
       )
     },
+
     { key: 'done-button', component: (
-        <TouchableOpacity onPress={handleDone} className="w-full bg-green-500 p-4 rounded-full mt-4 shadow-lg">
-          <Text className="text-white text-center font-bold text-lg">DONE</Text>
+        <TouchableOpacity onPress={handleDone} style={{ 
+          width: width * 0.8,   
+          backgroundColor: '#4CAF50', 
+          padding: 12, 
+          borderRadius: 8, 
+          marginTop: 16, 
+          alignSelf: 'center', 
+          shadowColor: '#000', 
+          shadowOffset: { width: 0, height: 2 }, 
+          shadowOpacity: 0.2, 
+          shadowRadius: 5 
+        }}>
+          <Text style={{ color: 'white', textAlign: 'center', fontWeight: 'bold', fontSize: 18 }}>DONE</Text>
         </TouchableOpacity>
       )
     },
   ];
 
   return (
-    <SafeAreaView className="flex-1 bg-white px-8">
-      <View className="flex-row items-center justify-between mt-10 mb-4">
+    <SafeAreaView className="flex-1 bg-white px-6">
+      <View className="flex-row items-center justify-between mt-2">
         <Image source={require('../../assets/Images/try.png')} className="w-28 h-28 self-end" resizeMode="contain" />
 
         {/* Profile Modal on the right */}
@@ -137,7 +162,7 @@ const LuxuryRideBooking = () => {
         data={content}
         renderItem={({ item }) => <View key={item.key}>{item.component}</View>}
         keyExtractor={(item) => item.key}
-        contentContainerStyle={{ paddingHorizontal: 40, paddingBottom: 30 }}
+        contentContainerStyle={{ paddingHorizontal: 30, paddingBottom: 10 }}
       />
 
       {/* Toast Message */}

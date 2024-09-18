@@ -43,7 +43,7 @@ const Dropdowncom = ({ label, iconname, color, data, focusColor = '#81D742', onS
         <View style={styles.buttonContent}>
           <Icon
             name={iconname}
-            size={20}
+            size={24} // Increased icon size
             color={color || 'black'}
             style={styles.icon}
           />
@@ -53,7 +53,7 @@ const Dropdowncom = ({ label, iconname, color, data, focusColor = '#81D742', onS
         </View>
         <AntDesign
           name={isOpen ? "up" : "down"}
-          size={20}
+          size={24} // Increased arrow size
           color={'black'}
         />
       </TouchableOpacity>
@@ -85,8 +85,8 @@ const Dropdowncom = ({ label, iconname, color, data, focusColor = '#81D742', onS
 
 const styles = StyleSheet.create({
   container: {
-    width: '100%',
-    maxWidth: SCREEN_WIDTH * 0.9,
+    width: SCREEN_WIDTH,
+    maxWidth: SCREEN_WIDTH * 0.8,
     zIndex: 100,
     marginBottom: 10,
     alignSelf: 'center',
@@ -95,11 +95,16 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    padding: 10,
+    padding: 15, 
     backgroundColor: 'white',
     borderWidth: 2,
-    borderRadius: 8,
+    borderRadius: 12,
     borderColor: 'gray',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.2,
+    shadowRadius: 5,
+    elevation: 2, 
   },
   buttonContent: {
     flexDirection: 'row',
@@ -107,20 +112,26 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   buttonText: {
-    fontSize: 16,
+    fontSize: 18, 
     flex: 1,
+    color: '#333',
   },
   icon: {
     marginRight: 16,
-    fontSize: 24,
+    fontSize: 24, 
   },
   dropdownList: {
-    maxHeight: SCREEN_WIDTH * 0.8,
+    maxHeight: SCREEN_WIDTH * 0.6, 
     borderWidth: 1,
     borderColor: 'gray',
-    borderRadius: 5,
+    borderRadius: 8,
     backgroundColor: 'white',
     marginTop: 5,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.2,
+    shadowRadius: 5,
+    elevation: 3,
   },
   dropdownItem: {
     padding: 15,
@@ -129,6 +140,7 @@ const styles = StyleSheet.create({
   },
   dropdownItemText: {
     fontSize: 16,
+    color: '#333',
   },
 });
 
