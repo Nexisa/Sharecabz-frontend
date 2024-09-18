@@ -1,13 +1,8 @@
 import React, { useState } from 'react';
-import {
-  View,
-  Text,
-  TextInput,
-  TouchableOpacity,
-  Image,
-} from 'react-native';
+import { View, Text, TextInput, TouchableOpacity, Image } from 'react-native';
 import { StackNavigationProp } from '@react-navigation/stack';
 import Toast from 'react-native-toast-message';
+import OTPInput from '../components/OTPInput'; 
 
 type RootStackParamList = {
   SignIn: undefined;
@@ -16,10 +11,7 @@ type RootStackParamList = {
   Home: undefined;
 };
 
-type SignUpScreenNavigationProp = StackNavigationProp<
-  RootStackParamList,
-  'SignUp'
->;
+type SignUpScreenNavigationProp = StackNavigationProp<RootStackParamList, 'SignUp'>;
 
 type Props = {
   navigation: SignUpScreenNavigationProp;
@@ -29,7 +21,10 @@ type FormData = {
   username: string;
   phoneNumber: string;
   email: string;
-  otp: string;
+  otp1: string;
+  otp2: string;
+  otp3: string;
+  otp4: string;
   password: string;
   confirmPassword: string;
 };
@@ -39,48 +34,16 @@ const SignUpScreen: React.FC<Props> = ({ navigation }) => {
     username: '',
     phoneNumber: '',
     email: '',
-    otp: '',
+    otp1: '',
+    otp2: '',
+    otp3: '',
+    otp4: '',
     password: '',
     confirmPassword: '',
   });
+  const [isOTPSent, setIsOTPSent] = useState(false);
 
   const handleChange = (name: keyof FormData, value: string) => {
-    if (name === 'username') {
-      if (/[^a-zA-Z]/.test(value)) {
-        Toast.show({
-          type: 'error',
-          position: 'top',
-          text1: 'Error',
-          text2: 'Username can only contain letters (a-z or A-Z)',
-        });
-      }
-      value = value.replace(/[^a-zA-Z]/g, '');
-    }
-
-    if (name === 'phoneNumber') {
-      if (/[^0-9]/.test(value)) {
-        Toast.show({
-          type: 'error',
-          position: 'top',
-          text1: 'Error',
-          text2: 'Phone Number can only contain digits (0-9)',
-        });
-      }
-      value = value.replace(/[^0-9]/g, '');
-    }
-
-    if (name === 'otp') {
-      if (/[^0-9]/.test(value)) {
-        Toast.show({
-          type: 'error',
-          position: 'top',
-          text1: 'Error',
-          text2: 'OTP can only contain digits (0-9)',
-        });
-      }
-      value = value.replace(/[^0-9]/g, '');
-    }
-
     setFormData({
       ...formData,
       [name]: value,
@@ -93,9 +56,9 @@ const SignUpScreen: React.FC<Props> = ({ navigation }) => {
   };
 
   const validateForm = () => {
-    const { username, phoneNumber, email, otp, password, confirmPassword } = formData;
+    const { username, phoneNumber, email, otp1, otp2, otp3, otp4, password, confirmPassword } = formData;
 
-    if (!username || !phoneNumber || !email || !otp || !password || !confirmPassword) {
+    if (!username || !phoneNumber || !email || !otp1 || !otp2 || !otp3 || !otp4 || !password || !confirmPassword) {
       Toast.show({
         type: 'error',
         position: 'top',
@@ -138,27 +101,83 @@ const SignUpScreen: React.FC<Props> = ({ navigation }) => {
     }
   };
 
+  const handleSendOTP = () => {
+    if (!isValidEmail(formData.email)) {
+      Toast.show({
+        type: 'error',
+        position: 'top',
+        text1: 'Invalid Email',
+        text2: 'Please provide a valid email address to send OTP',
+      });
+      return;
+    }
+
+    setIsOTPSent(true);
+    Toast.show({
+      type: 'success',
+      position: 'top',
+      text1: 'OTP Sent',
+      text2: 'Please check your email for the OTP',
+    });
+  };
+
+  const handleVerify = async (otp: string) => {
+    // Implement your OTP verification logic here
+  
+    const isVerified = true;
+
+    Toast.show({
+      type: isVerified ? 'success' : 'error',
+      position: 'top',
+      text1: isVerified ? 'OTP Verified' : 'OTP Verification Failed',
+      text2: isVerified ? 'Your OTP has been verified successfully.' : 'Please check your OTP and try again.',
+    });
+
+    return isVerified;
+  };
+
   const renderInputField = (
     placeholder: string,
     name: keyof FormData,
-    secureTextEntry = false
+    secureTextEntry = false,
+    isEmailField = false
   ) => (
     <View style={{ width: '100%', marginBottom: 15 }}>
-      <TextInput
-        style={{
-          borderWidth: 1,
-          borderColor: '#ccc',
-          borderRadius: 25,
-          padding: 10,
-          paddingHorizontal: 15,
-          color: '#000',
-        }}
-        placeholder={placeholder}
-        placeholderTextColor="#7A7A7A"
-        secureTextEntry={secureTextEntry}
-        onChangeText={(value) => handleChange(name, value)}
-        value={formData[name]}
-      />
+      <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+        <TextInput
+          style={{
+            flex: isEmailField ? 1 : undefined,
+            borderWidth: 1,
+            borderColor: '#ccc',
+            borderRadius: 25,
+            padding: 10,
+            paddingHorizontal: 15,
+            color: '#000',
+            width: isEmailField ? '80%' : '100%',
+          }}
+          placeholder={placeholder}
+          placeholderTextColor="#7A7A7A"
+          secureTextEntry={secureTextEntry}
+          onChangeText={(value) => handleChange(name, value)}
+          value={formData[name]}
+        />
+        {isEmailField && (
+          <TouchableOpacity
+            onPress={handleSendOTP}
+            disabled={!formData.email || !isValidEmail(formData.email)}
+            style={{
+              backgroundColor: '#81D742',
+              padding: 15,
+              borderRadius: 10,
+              marginLeft: 10,
+            }}
+          >
+            <Text style={{ color: '#fff', fontWeight: 'bold' }}>
+              {isOTPSent ? 'Resend OTP' : 'Send OTP'}
+            </Text>
+          </TouchableOpacity>
+        )}
+      </View>
     </View>
   );
 
@@ -178,8 +197,17 @@ const SignUpScreen: React.FC<Props> = ({ navigation }) => {
 
         {renderInputField('User Name', 'username')}
         {renderInputField('Phone Number', 'phoneNumber')}
-        {renderInputField('E-mail', 'email')}
-        {renderInputField('OTP', 'otp')}
+        {renderInputField('E-mail', 'email', false, true)}
+
+        <OTPInput
+          otp1={formData.otp1}
+          otp2={formData.otp2}
+          otp3={formData.otp3}
+          otp4={formData.otp4}
+          onChange={handleChange}
+          onVerify={handleVerify}
+        />
+
         {renderInputField('Password', 'password', true)}
         {renderInputField('Confirm Password', 'confirmPassword', true)}
 
@@ -199,9 +227,11 @@ const SignUpScreen: React.FC<Props> = ({ navigation }) => {
 
         <TouchableOpacity onPress={() => navigation.navigate('SignIn')}>
           <Text style={{ textAlign: 'center', marginTop: 20, color: '#7A7A7A' }}>
-            Already have an account? <Text style={{ color: '#81D742', fontWeight: 'bold' }}>SIGN IN</Text>
+            Already have an account?
+            <Text style={{ color: '#81D742', fontWeight: 'bold' }}> SIGN IN</Text>
           </Text>
         </TouchableOpacity>
+
       </View>
       <Toast />
     </View>
