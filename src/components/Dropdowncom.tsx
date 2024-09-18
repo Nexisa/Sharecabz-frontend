@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
-import { StyleSheet, Text, View, TouchableOpacity, FlatList } from 'react-native';
+import { StyleSheet, Text, View, TouchableOpacity, FlatList, Dimensions } from 'react-native';
 import { AntDesign } from '@expo/vector-icons';
 import Icon from '@expo/vector-icons/FontAwesome6';
+
 type DropdownItem = {
   label: any;
   value: any;
@@ -16,7 +17,7 @@ type DropdownProps = {
   onSelect: (item: DropdownItem) => void;
 };
 
-
+const { width: SCREEN_WIDTH } = Dimensions.get('window');
 
 const Dropdowncom = ({ label, iconname, color, data, focusColor = '#81D742', onSelect }: DropdownProps) => {
   const [isOpen, setIsOpen] = useState(false);
@@ -29,7 +30,6 @@ const Dropdowncom = ({ label, iconname, color, data, focusColor = '#81D742', onS
     setIsOpen(false);
     onSelect(item);
   };
-
 
   return (
     <View style={styles.container}>
@@ -47,7 +47,7 @@ const Dropdowncom = ({ label, iconname, color, data, focusColor = '#81D742', onS
             color={color || 'black'}
             style={styles.icon}
           />
-          <Text style={styles.buttonText}>
+          <Text style={styles.buttonText} numberOfLines={1} ellipsizeMode="tail">
             {selectedItem ? selectedItem.label : label}
           </Text>
         </View>
@@ -72,7 +72,9 @@ const Dropdowncom = ({ label, iconname, color, data, focusColor = '#81D742', onS
               ]}
               onPress={() => handleSelect(item)}
             >
-              <Text style={styles.dropdownItemText}>{item.label}</Text>
+              <Text style={styles.dropdownItemText} numberOfLines={1} ellipsizeMode="tail">
+                {item.label}
+              </Text>
             </TouchableOpacity>
           )}
         />
@@ -84,14 +86,17 @@ const Dropdowncom = ({ label, iconname, color, data, focusColor = '#81D742', onS
 const styles = StyleSheet.create({
   container: {
     width: '100%',
-    maxWidth: 350, zIndex: 100,
+    maxWidth: SCREEN_WIDTH * 0.9,
+    zIndex: 100,
     marginBottom: 10,
+    alignSelf: 'center',
   },
   button: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    padding: 10, backgroundColor: 'white',
+    padding: 10,
+    backgroundColor: 'white',
     borderWidth: 2,
     borderRadius: 8,
     borderColor: 'gray',
@@ -99,18 +104,18 @@ const styles = StyleSheet.create({
   buttonContent: {
     flexDirection: 'row',
     alignItems: 'center',
+    flex: 1,
   },
   buttonText: {
-    fontSize: 16, 
-    flexShrink: 3, 
+    fontSize: 16,
+    flex: 1,
   },
   icon: {
     marginRight: 16,
-   
-    fontSize: 24, 
+    fontSize: 24,
   },
   dropdownList: {
-    maxHeight: 300, 
+    maxHeight: SCREEN_WIDTH * 0.8,
     borderWidth: 1,
     borderColor: 'gray',
     borderRadius: 5,
@@ -118,14 +123,13 @@ const styles = StyleSheet.create({
     marginTop: 5,
   },
   dropdownItem: {
-    padding: 20, 
+    padding: 15,
     borderBottomWidth: 1,
     borderBottomColor: '#f0f0f0',
   },
   dropdownItemText: {
-    fontSize: 16, 
+    fontSize: 16,
   },
 });
-
 
 export default Dropdowncom;
