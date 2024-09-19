@@ -1,5 +1,5 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { View, TextInput, TouchableOpacity, Text } from 'react-native';
+import React, { useState, useRef, useEffect } from 'react';
+import { View, Text, TextInput } from 'react-native';
 import Toast from 'react-native-toast-message';
 
 type OTPInputProps = {
@@ -26,18 +26,6 @@ const OTPInput: React.FC<OTPInputProps> = ({ otp1, otp2, otp3, otp4, onChange, o
     }
   };
 
-  const handleVerify = async () => {
-    const otp = `${otp1}${otp2}${otp3}${otp4}`;
-    const isVerified = await onVerify(otp);
-
-    Toast.show({
-      type: isVerified ? 'success' : 'error',
-      position: 'top',
-      text1: isVerified ? 'OTP Verified' : 'OTP Verification Failed',
-      text2: isVerified ? 'Your OTP has been verified successfully.' : 'Please check your OTP and try again.',
-    });
-  };
-
   const otpRefs = [
     useRef<TextInput>(null),
     useRef<TextInput>(null),
@@ -46,51 +34,47 @@ const OTPInput: React.FC<OTPInputProps> = ({ otp1, otp2, otp3, otp4, onChange, o
   ];
 
   return (
-    <View className="flex flex-row items-center w-full justify-between py-4">
-      <View className="flex flex-row">
-        <TextInput
-          className="w-12 h-12 border border-gray-300 rounded-lg text-center text-2xl mx-2"
-          keyboardType="number-pad"
-          maxLength={1}
-          value={otp1}
-          onChangeText={(value) => handleChange(value, 'otp1', otpRefs[1])}
-          ref={otpRefs[0]}
-        />
-        <TextInput
-          className="w-12 h-12 border border-gray-300 rounded-lg text-center text-2xl mx-2"
-          keyboardType="number-pad"
-          maxLength={1}
-          value={otp2}
-          onChangeText={(value) => handleChange(value, 'otp2', otpRefs[2])}
-          ref={otpRefs[1]}
-        />
-        <TextInput
-          className="w-12 h-12 border border-gray-300 rounded-lg text-center text-2xl mx-2"
-          keyboardType="number-pad"
-          maxLength={1}
-          value={otp3}
-          onChangeText={(value) => handleChange(value, 'otp3', otpRefs[3])}
-          ref={otpRefs[2]}
-        />
-        <TextInput
-          className="w-12 h-12 border border-gray-300 rounded-lg text-center text-2xl mx-2"
-          keyboardType="number-pad"
-          maxLength={1}
-          value={otp4}
-          onChangeText={(value) => handleChange(value, 'otp4')}
-          ref={otpRefs[3]}
-        />
-      </View>
+    <View className= "px-2 py-5">
+      <View className="flex-row items-center justify-between w-full">
+        {/* Left side: Text */}
+        <Text className="flex-1 text-lg pr-2.5" style={{ color: '#7A7A7A' }}>Enter OTP</Text>
 
-      <TouchableOpacity
-        className={`py-4 px-6 rounded-lg border  ${isVerifyEnabled ? 'bg-[#81D742]' : 'bg-white border-[#81D742]'}`}
-        onPress={handleVerify}
-        disabled={!isVerifyEnabled}
-      >
-        <Text className={`${isVerifyEnabled ? 'text-white' : 'text-[#81D742]'} font-bold`}>
-          Verify
-        </Text>
-      </TouchableOpacity>
+        {/* Right side: OTP input boxes */}
+        <View className="flex-row">
+          <TextInput
+            className="w-10 h-10 border border-gray-300 rounded-lg text-center mx-1 text-xl"
+            keyboardType="number-pad"
+            maxLength={1}
+            value={otp1}
+            onChangeText={(value) => handleChange(value, 'otp1', otpRefs[1])}
+            ref={otpRefs[0]}
+          />
+          <TextInput
+            className="w-10 h-10 border border-gray-300 rounded-lg text-center mx-1 text-xl"
+            keyboardType="number-pad"
+            maxLength={1}
+            value={otp2}
+            onChangeText={(value) => handleChange(value, 'otp2', otpRefs[2])}
+            ref={otpRefs[1]}
+          />
+          <TextInput
+            className="w-10 h-10 border border-gray-300 rounded-lg text-center mx-1 text-xl"
+            keyboardType="number-pad"
+            maxLength={1}
+            value={otp3}
+            onChangeText={(value) => handleChange(value, 'otp3', otpRefs[3])}
+            ref={otpRefs[2]}
+          />
+          <TextInput
+            className="w-10 h-10 border border-gray-300 rounded-lg text-center mx-1 text-xl"
+            keyboardType="number-pad"
+            maxLength={1}
+            value={otp4}
+            onChangeText={(value) => handleChange(value, 'otp4')}
+            ref={otpRefs[3]}
+          />
+        </View>
+      </View>
     </View>
   );
 };
