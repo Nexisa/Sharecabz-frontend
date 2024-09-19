@@ -49,7 +49,7 @@ const apiUrl = process.env.EXPO_PUBLIC_API;
       });
       return;
     }
-
+let res;
     try {
       const req= await fetch(`${apiUrl}auth/login`, {
         method: 'POST',
@@ -61,13 +61,15 @@ const apiUrl = process.env.EXPO_PUBLIC_API;
           password:password
          }),
       });
+   
+    
 console.log('API URL:', `${apiUrl}/auth/login`);
 console.log('Request Body:', JSON.stringify({ 
   email: email,
   password: password
 }));
   
-      const res = await req.json();/*
+      res = await req.json(); /*
 <LoadingScreen startAsync={res} onFinish={() => {}} onError={(err) => {
   Toast.show({
     type: 'error',
@@ -76,12 +78,16 @@ console.log('Request Body:', JSON.stringify({
     text2: 'An error occurred during sign-in. Please try again.',
   });
 }} />*/
- console.log("sss");
+ console.log('sss');
       console.log(res);
       if (!req.ok) {
         console.log('Error:', res);
         return;
       }
+    }
+    catch (error) {
+      console.error('Error:', error);
+    }
       //save res.token in async storage
       dispatch(login())
       await AsyncStorage.setItem('token', res.token);
@@ -117,15 +123,16 @@ console.log('Request Body:', JSON.stringify({
           text2: 'Invalid Role',
         });
       }
-    } catch (error) {
-      Toast.show({
-        type: 'error',
-        position: 'top',
-        text1: 'Sign In Failed',
-        text2: 'An error occurred during sign-in. Please try again.',
-      });
-    }
+    // } catch (error) {
+    //   Toast.show({
+    //     type: 'error',
+    //     position: 'top',
+    //     text1: 'Sign In Failed',
+    //     text2: 'An error occurred during sign-in. Please try again.',
+    //   });
+   // }
   };
+
 
   return (
     <View className="flex-1 bg-[#81D742] justify-center items-center">
