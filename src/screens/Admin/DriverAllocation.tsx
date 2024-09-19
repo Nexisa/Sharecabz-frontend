@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { View, Text, TextInput, TouchableOpacity, Dimensions, Alert, Modal, Button } from 'react-native';
-import { useNavigation } from '@react-navigation/native';
+import { useNavigation, useRoute } from '@react-navigation/native';
 import { Ionicons } from '@expo/vector-icons';
 import Toast from 'react-native-toast-message';
 
@@ -10,11 +10,15 @@ const DriverAllocation = () => {
   const [driverNumber, setDriverNumber] = useState('');
   const [cabModel, setCabModel] = useState('Innova Crysta');
   const [isDropdownVisible, setIsDropdownVisible] = useState(false);
-
+const api = process.env.EXPO_PUBLIC_API;
+  const route = useRoute();
+  //get bookingId from prev screen
+  const bookingId = route.params?.bookingId;
+  console.log('Booking ID:', bookingId);
   const navigation = useNavigation();
   const { width, height } = Dimensions.get('window'); // Get screen width and height dynamically
 
-  const handleDriverAllocation = () => {
+  const handleDriverAllocation = async() => {
     if (!driverName || !cabNumber || !driverNumber || !cabModel) {
       Toast.show({
         type: 'error',
@@ -24,7 +28,29 @@ const DriverAllocation = () => {
       });
       return;
     }
-
+    const response = await fetch(`${api}/booking/allocateDriver`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        bookingId,
+        driverName,
+        cabNumber,
+        driverNumber,
+        cabModel,
+      }),
+    });
+    const res = await response.json();
+    if (!res.success) {
+      Toast.show({
+        type: 'error',
+        position: 'top',
+        text1: 'Error',
+        text2: 'Driver allocation failed. Please try again.',
+      });
+    }
+    
     console.log('Driver allocated:', driverName, cabNumber, cabModel);
     navigation.navigate('Status' as never); // Redirect to Driver Allotment Status
   };

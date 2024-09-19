@@ -1,8 +1,5 @@
-
-import { FlatList, Modal, StyleSheet, Text, TouchableOpacity, View } from "react-native";
-import BookingDetails from "../../components/BookingDetails";
-import React, { useState } from "react";
-
+import React, { useState, useEffect } from 'react';
+import { FlatList, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { useNavigation } from "@react-navigation/native";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -10,87 +7,83 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useDispatch } from "react-redux";
 import { logout } from "../../utils/Slice";
 
-interface BookingDetail {
-  name: string;
-  bookingId: string;
+interface Booking {
+  _id: string;
+  username: string;
+  sourceLocation: string;
+  destinationLocation: string;
+  pickupPoint: string;
+  startDate: string;
+  endDate: string;
+  seats: number;
+  paymentStatus: string;
 }
 
-interface BookingDetailsScreenProps {
-  bookings: BookingDetail[];
-  onPrevious: () => void;
-  onNext: () => void;
-  onPressViewDetails: (bookingId: string) => void;
-}
 const AdminHome = () => {
-  // Sample bookings data
-  const api = process.env.EXPO_PUBLIC_API;
+  const [bookings, setBookings] = useState<Booking[]>([]);
+  const [sortOrder, setSortOrder] = useState<"asc" | "desc">("asc");
+  const navigation = useNavigation();
   const dispatch = useDispatch();
-  const data = async() => {
-    const token = await AsyncStorage.getItem('token');
-    const response = await fetch(`${api}/booking/getallbookings`, {
-      method: 'GET',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${token}`,
-      },
-    });
-    const res = await response.json();
-    console.log(res);
+  const api = process.env.EXPO_PUBLIC_API;
 
-  }
-data();
-  const bookings = [
-    { name: "Samuel Peterson", bookingId: "BOD132763" },
-    { name: "Megan Watson", bookingId: "BOD132768" },
-    // Add more bookings here
-  ];
+  useEffect(() => {
+    fetchBookings();
+  }, []);
 
-  // Function to handle view details press
-  const handleViewDetails = (bookingId: string) => {
-    // API call or navigation to details page can be handled here
-    console.log("View details for booking ID:", bookingId);
+  const fetchBookings = async () => {
+    try {
+      const token = await AsyncStorage.getItem('token');
+      const response = await fetch(`${api}/booking/getallbookings`, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
+        },
+      });
+      const res = await response.json();
+      if (res.success && res.bookings) {
+        setBookings(res.bookings);
+      }
+    } catch (error) {
+      console.error("Error fetching bookings:", error);
+    }
   };
 
-  const [sortOrder, setSortOrder] = useState<"asc" | "desc">("asc");
-
-  const navigation = useNavigation();
   const toggleSortOrder = () => {
     setSortOrder(sortOrder === "asc" ? "desc" : "asc");
   };
 
   const sortedBookings = [...bookings].sort((a, b) => {
-    return sortOrder === "asc"
-      ? a.name.localeCompare(b.name)
-      : b.name.localeCompare(a.name);
+    if (a.username && b.username) {
+      return sortOrder === "asc"
+        ? a.username.localeCompare(b.username)
+        : b.username.localeCompare(a.username);
+    }
+    return 0;
   });
 
-  const renderItem = ({ item }: { item: BookingDetail }) => (
-    <TouchableOpacity onPress={() => handlePress()} style={styles.row}>
-      <Text style={styles.name}>{item.name}</Text>
-      <Text style={styles.bookingId}>{item.bookingId}</Text>
+  const renderItem = ({ item }: { item: Booking }) => (
+    <TouchableOpacity onPress={() => handlePress(item._id)} style={styles.row}>
+      <Text style={styles.name}>{item.username || 'N/A'}</Text>
+      <Text style={styles.bookingId}>B{item._id.slice(-6)}</Text>
       <Ionicons name="eye-outline" size={24} color="#000" />
     </TouchableOpacity>
   );
 
-  const handlePress = () => {
-    navigation.navigate("UserDetailPage" as never);
+  const handlePress = (bookingId: string) => {
+    // Navigate to booking details page
+    navigation.navigate("UserDetailPage" as never, { bookingId } as never);
   };
-  const onPrevious = () => {
-    console.log("Previous button pressed");
-  }
-  const onNext = () => {
-    console.log("Next button pressed");
-  }
-  const openmodal = async() => {
-        
+
+  const openmodal = async () => {
     await AsyncStorage.removeItem('user');
     await AsyncStorage.removeItem('token');
-        dispatch(logout()),
-        navigation.navigate('SignIn' as never) 
-  }
+    dispatch(logout());
+    navigation.navigate('SignIn' as never);
+  };
+
   return (
-    <SafeAreaView className="flex-1 p-5 pt-5" >
-      
+    <SafeAreaView style={styles.container}>
       <View style={styles.header}>
         <View style={styles.searchBar}>
           <Ionicons name="search" size={20} color="#999" />
@@ -118,25 +111,11 @@ data();
       <FlatList
         data={sortedBookings}
         renderItem={renderItem}
-        keyExtractor={(item, index) => `${item.bookingId}-${index}`}
+        keyExtractor={(item) => item._id}
       />
-    
     </SafeAreaView>
-   
   );
 };
-/*
-  return (
-    <SafeAreaView className="flex-1 p-5 pt-5">
-      <View className="flex-row"></View>
-      <BookingDetails
-        bookings={bookings}
-        onPressViewDetails={handleViewDetails}
-      />
-    </SafeAreaView>
-  );*/
-
-
 const styles = StyleSheet.create({
   container: {
     flex: 1,
@@ -204,5 +183,6 @@ const styles = StyleSheet.create({
     textAlign: "center",
   },
 });
+
 
 export default AdminHome;

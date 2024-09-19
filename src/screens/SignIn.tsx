@@ -14,6 +14,7 @@ import { login } from '../utils/Slice';
 import Toast from 'react-native-toast-message';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import LoadingScreen from '../components/LoadingScreen';
+import Loading from '../components/Loading';
 
 type RootStackParamList = {
   SignIn: undefined;
@@ -36,6 +37,7 @@ const SignInScreen: React.FC<Props> = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [eye, setEye] = useState(true);
+  const [loading, setLoading] = useState(false);
   const navigation = useNavigation();
   const dispatch = useDispatch();
 const apiUrl = process.env.EXPO_PUBLIC_API;
@@ -51,6 +53,7 @@ const apiUrl = process.env.EXPO_PUBLIC_API;
     }
 let res;
     try {
+
       const req= await fetch(`${apiUrl}/auth/login`, {
         method: 'POST',
         headers: {
@@ -148,8 +151,11 @@ try {
    // }
   };
 
-
+if (loading) {
+  return <Loading visible={loading} />;
+} else {
   return (
+    
     <View className="flex-1 bg-[#81D742] justify-center items-center">
       <View className="absolute top-0 left-0 right-0 h-52 bg-[#81D742] rounded-b-3xl" />
 
@@ -222,5 +228,5 @@ try {
     </View>
   );
 };
-
+};
 export default SignInScreen;
