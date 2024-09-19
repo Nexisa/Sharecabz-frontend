@@ -1,11 +1,14 @@
 
-import { FlatList, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { FlatList, Modal, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import BookingDetails from "../../components/BookingDetails";
 import React, { useState } from "react";
 
 import { Ionicons } from "@expo/vector-icons";
 import { useNavigation } from "@react-navigation/native";
 import { SafeAreaView } from "react-native-safe-area-context";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import { useDispatch } from "react-redux";
+import { logout } from "../../utils/Slice";
 
 interface BookingDetail {
   name: string;
@@ -20,6 +23,22 @@ interface BookingDetailsScreenProps {
 }
 const AdminHome = () => {
   // Sample bookings data
+  const api = process.env.EXPO_PUBLIC_API;
+  const dispatch = useDispatch();
+  const data = async() => {
+    const token = await AsyncStorage.getItem('token');
+    const response = await fetch(`${api}/booking/getallbookings`, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`,
+      },
+    });
+    const res = await response.json();
+    console.log(res);
+
+  }
+data();
   const bookings = [
     { name: "Samuel Peterson", bookingId: "BOD132763" },
     { name: "Megan Watson", bookingId: "BOD132768" },
@@ -62,6 +81,13 @@ const AdminHome = () => {
   const onNext = () => {
     console.log("Next button pressed");
   }
+  const openmodal = async() => {
+        
+    await AsyncStorage.removeItem('user');
+    await AsyncStorage.removeItem('token');
+        dispatch(logout()),
+        navigation.navigate('SignIn' as never) 
+  }
   return (
     <SafeAreaView className="flex-1 p-5 pt-5" >
       
@@ -70,7 +96,7 @@ const AdminHome = () => {
           <Ionicons name="search" size={20} color="#999" />
           <Text style={styles.searchText}>Search By booking Id...</Text>
         </View>
-        <TouchableOpacity>
+        <TouchableOpacity onPress={openmodal}>
           <Ionicons name="menu" size={24} color="#000" />
         </TouchableOpacity>
       </View>
