@@ -51,7 +51,7 @@ const apiUrl = process.env.EXPO_PUBLIC_API;
     }
 let res;
     try {
-      const req= await fetch(`${apiUrl}auth/login`, {
+      const req= await fetch(`${apiUrl}/auth/login`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -69,7 +69,22 @@ console.log('Request Body:', JSON.stringify({
   password: password
 }));
   
-      res = await req.json(); /*
+try {
+  const textResponse = await req.text();
+  try {
+    res = JSON.parse(textResponse); // Parse JSON if it's valid
+  } catch (err) {
+    console.error('Error parsing JSON:', err);
+    res = { message: textResponse }; // Fallback for non-JSON responses
+  }
+  
+  console.log('Response:', res);
+}
+ catch (error) {  
+  console.error('Error:', error);
+  res = { message: 'An error occurred. Please try again.' };
+}
+/*
 <LoadingScreen startAsync={res} onFinish={() => {}} onError={(err) => {
   Toast.show({
     type: 'error',
