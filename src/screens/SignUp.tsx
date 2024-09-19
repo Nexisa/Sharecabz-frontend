@@ -272,7 +272,6 @@ if(otp.length < 4){
           otp3={formData.otp3}
           otp4={formData.otp4}
           onChange={handleChange}
-          onVerify={handleVerify}
         />
 
         {renderInputField('Password', 'password', true)}

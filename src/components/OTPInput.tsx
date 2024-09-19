@@ -8,10 +8,9 @@ type OTPInputProps = {
   otp3: string;
   otp4: string;
   onChange: (name: 'otp1' | 'otp2' | 'otp3' | 'otp4', value: string) => void;
-  onVerify: (otp: string) => Promise<boolean>;
 };
 
-const OTPInput: React.FC<OTPInputProps> = ({ otp1, otp2, otp3, otp4, onChange, onVerify }) => {
+const OTPInput: React.FC<OTPInputProps> = ({ otp1, otp2, otp3, otp4, onChange }) => {
   const [isVerifyEnabled, setIsVerifyEnabled] = useState(false);
 
   useEffect(() => {
