@@ -6,8 +6,6 @@ import {
   TextInput,
   TouchableOpacity,
   StyleSheet,
-  Alert,
-  KeyboardAvoidingView,
 } from 'react-native';
 import Toast from 'react-native-toast-message';
 
@@ -16,7 +14,7 @@ const ForgetPasswordScreen = () => {
   const [code, setCode] = useState(['', '', '', '']);
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
-
+const api=process.env.EXPO_PUBLIC_API;
   const navigation = useNavigation();
 
   const inputRefs = useRef<(TextInput | null)[]>([]); // Refs for code inputs
@@ -28,12 +26,22 @@ const ForgetPasswordScreen = () => {
     });
   };
 
-  const handleEmailSubmit = () => {
+  const handleEmailSubmit = async() => {
     if (!email) {
       showToast('Please enter an email');
     } else {
-      showToast('Verification code sent to email');
-    }
+      const req=await fetch(`${api}/auth/resetOtp`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ email:email }),
+      });
+        if (req.ok) {
+          showToast('Verification code sent to email');
+        }
+      }
+    
   };
 
   const handleCodeChange = (index: number, value: string) => {
@@ -54,7 +62,7 @@ const ForgetPasswordScreen = () => {
     }
   };
 
-  const handlePasswordReset = () => {
+  const handlePasswordReset = async() => {
     if (!newPassword || !confirmPassword) {
       showToast('Please fill out both password fields');
       return;
@@ -64,6 +72,28 @@ const ForgetPasswordScreen = () => {
       return;
     }
     // Add further validation if needed
+    const req1= await fetch(`${api}/auth/resetPassword`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ 
+        email:email,
+        otp:code.join(''),
+        confirmpassword:confirmPassword,
+        newpassword:newPassword }),
+    });
+    if(req1.ok){
+      showToast('Password reset successfully');
+      navigation.navigate('SignIn' as never);
+    }
+    else{
+      showToast('Password reset failed Try again');
+    }
+
+
+
+
     showToast('Password reset successfully');
   };
 
@@ -81,7 +111,7 @@ const ForgetPasswordScreen = () => {
           keyboardType="email-address"
         />
         <TouchableOpacity style={styles.button} onPress={handleEmailSubmit}>
-          <Text style={styles.buttonText}>NEXT</Text>
+          <Text style={styles.buttonText}>Send OTP</Text>
         </TouchableOpacity>
 
         <Text style={styles.verificationText}>Enter Verification Code</Text>
@@ -100,16 +130,13 @@ const ForgetPasswordScreen = () => {
           ))}
         </View>
 
-        <TouchableOpacity style={styles.resend}>
+        <TouchableOpacity onPress={handleEmailSubmit} style={styles.resend}>
           <Text style={styles.receivedText}>
             If you didn't receive a code,{' '}
             <Text style={styles.resendText}>Resend</Text>
           </Text>
         </TouchableOpacity>
 
-        <TouchableOpacity style={styles.button} onPress={handleCodeSend}>
-          <Text style={styles.buttonText}>VERIFY</Text>
-        </TouchableOpacity>
 
         <TextInput
           style={styles.input}
