@@ -1,10 +1,10 @@
 import React from "react";
-import { NavigationContainer } from "@react-navigation/native";
+import { NavigationContainer, useNavigation } from "@react-navigation/native";
 import { createStackNavigator } from "@react-navigation/stack";
 import Toast from 'react-native-toast-message';
 
 import { useDispatch, useSelector } from "react-redux";
-import { selectIsAuthenticated } from "../utils/Slice";
+import { login, selectIsAuthenticated } from "../utils/Slice";
 
 import Home from "../screens/Home";
 import BookLuxuryRideScreen from "../screens/BookLuxaryRide";
@@ -27,7 +27,7 @@ import JsonSlice, { updateField } from "../utils/JsonSlice";
 import UserDetailPage from "../screens/Admin/UserDetailPage";
 import DriverAllocation from "../screens/Admin/DriverAllocation";
 import AllotmentStatusPage from "../screens/Admin/DriverAllotment_Status";
-
+import AsyncStorage from "@react-native-async-storage/async-storage";
 const Stack = createStackNavigator();
 
 const AuthStack = () => (
@@ -64,12 +64,34 @@ const MainStack = () => (
 );
 
 const RootNav = () => {
+  const dispatch = useDispatch();
+  const navigation = useNavigation();
+  const scr = async () => {
+    const token = await AsyncStorage.getItem("token");
+    if (token) {
+      dispatch(login());
+    }
+    if (token) {
+      const userString = await AsyncStorage.getItem("user");
+      if (userString) {
+        const user = JSON.parse(userString);
+        if(user?.role==='admin'){
+          navigation.navigate('AdminHome' as never);
+        }
+        else{
+          navigation.navigate('Home' as never);
+        }
+
+      }
+    }
+  }
+  scr();
   const isAuthenticated = useSelector(selectIsAuthenticated);
 
   return (
-    <NavigationContainer>
+    <>
       {isAuthenticated ? <MainStack /> : <AuthStack />}
-    </NavigationContainer>
+    </>
   );
 };
 

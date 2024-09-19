@@ -9,6 +9,7 @@ import Toast from 'react-native-toast-message';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 import { store } from './src/utils/Store';  // Import your store
+import { NavigationContainer } from '@react-navigation/native';
 
 
 
@@ -37,8 +38,10 @@ export default function App() {
 
   return (
     <Provider store={store}>
+      <NavigationContainer>
     <RootNav/>
     <Toast />
+    </NavigationContainer>
     </Provider>
   );
 }
