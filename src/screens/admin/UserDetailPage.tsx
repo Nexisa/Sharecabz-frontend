@@ -1,11 +1,14 @@
 import React, { useEffect, useState } from 'react';
 import { View, Text, StyleSheet, Image, TouchableOpacity, TextInput, ScrollView } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { useNavigation } from '@react-navigation/native';
+import { useNavigation, useRoute } from '@react-navigation/native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const UserDetailPage = () => {
   const navigation = useNavigation();
-  
+  const route = useRoute();
+  //get bookingId from prev screen
+  const bookingId = route.params?.bookingId;
   // State to store user details fetched from API
   const [userDetails, setUserDetails] = useState({
     email: '',
@@ -18,23 +21,32 @@ const UserDetailPage = () => {
     totalSeats: '',
     paymentStatus: '',
   });
-
+const api = process.env.EXPO_PUBLIC_API;
   // Function to fetch user details from API
   const fetchUserDetails = async () => {
     try {
       // Fetch data from the API
-      const response = await fetch('https://api.example.com/userDetails'); // Replace with actual API
-      const data = await response.json();
+      const token = await AsyncStorage.getItem('token');
+      const response = await fetch(`${api}/booking/getbooking/${bookingId}`, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
+        },
+      });
+      const res=await response.json();
+      const data = res.booking;
+      //console.log('User details:', data);
       // Set the state with the fetched data
       setUserDetails({
-        email: data.email,
-        phone: data.phone,
+        email: data.userId.email,
+        phone: data.userId.phone,
         sourceLocation: data.sourceLocation,
         destinationLocation: data.destinationLocation,
-        pickupLocation: data.pickupLocation,
-        date: data.date,
+        pickupLocation: data.pickupPoint,
+        date: data.startDate,
         time: data.time,
-        totalSeats: data.totalSeats,
+        totalSeats: data.seats,
         paymentStatus: data.paymentStatus,
       });
     } catch (error) {
@@ -67,8 +79,8 @@ const UserDetailPage = () => {
           style={styles.avatar}
           source={require('../../../assets/Images/profile_image.png')} 
         />
-        <Text style={styles.name}>Emily Smith</Text>
-        <Text style={styles.username}>@emilysmith</Text>
+        <Text style={styles.name}>{userDetails.username || "N/A"}</Text>
+        <Text style={styles.username}>{userDetails.email}</Text>
       </View>
 
       {/* User Booking Details */}
@@ -109,7 +121,7 @@ const UserDetailPage = () => {
             <Text style={styles.cancelButtonText}>Cancel</Text>
           </TouchableOpacity>
 
-          <TouchableOpacity onPress={() => navigation.navigate('DriverAllocation' as never)} style={styles.nextButton}>
+          <TouchableOpacity onPress={() => navigation.navigate('DriverAllocation' as never,{bookingId} as never)} style={styles.nextButton}>
             <Text style={styles.nextButtonText}>Next Page</Text>
           </TouchableOpacity>
         </View>
