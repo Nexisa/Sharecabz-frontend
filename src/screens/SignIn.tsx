@@ -35,6 +35,7 @@ type Props = {
 const SignInScreen: React.FC<Props> = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [eye, setEye] = useState(true);
   const navigation = useNavigation();
   const dispatch = useDispatch();
 const apiUrl = process.env.EXPO_PUBLIC_API;
@@ -59,14 +60,14 @@ const apiUrl = process.env.EXPO_PUBLIC_API;
           email:email,
           password:password
          }),
-      });/*
+      });
 console.log('API URL:', `${apiUrl}/auth/login`);
 console.log('Request Body:', JSON.stringify({ 
   email: email,
   password: password
-}));*/
+}));
   
-      const res = await req.json();
+      const res = await req.json();/*
 <LoadingScreen startAsync={res} onFinish={() => {}} onError={(err) => {
   Toast.show({
     type: 'error',
@@ -74,10 +75,11 @@ console.log('Request Body:', JSON.stringify({
     text1: 'Error',
     text2: 'An error occurred during sign-in. Please try again.',
   });
-}} />
+}} />*/
+ console.log("sss");
       console.log(res);
       if (!req.ok) {
-        throw new Error(res.message);
+        console.log('Error:', res);
         return;
       }
       //save res.token in async storage
@@ -145,14 +147,19 @@ console.log('Request Body:', JSON.stringify({
           onChangeText={setEmail}
         />
 
-        <TextInput
-          className="border border-gray-300 rounded-full py-3 px-4 my-2 w-full text-black"
-          placeholder="Password"
-          placeholderTextColor="#7A7A7A"
-          secureTextEntry
-          value={password}
-          onChangeText={setPassword}
-        />
+        <View className="border border-gray-300 rounded-full py-3 px-4 my-2 w-full flex-row items-center">
+          <TextInput
+            className="flex-1 text-black"
+            placeholder="Password"
+            placeholderTextColor="#7A7A7A"
+            secureTextEntry={eye}
+            value={password}
+            onChangeText={setPassword}
+          />
+          <TouchableOpacity onPress={() => setEye(!eye)}>
+            <FontAwesome name={eye ? 'eye-slash' : 'eye'} size={24} color="#7A7A7A" />
+          </TouchableOpacity>
+        </View>
 
         <TouchableOpacity
           className="self-end my-2"
