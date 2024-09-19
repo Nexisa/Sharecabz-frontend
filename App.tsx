@@ -6,7 +6,7 @@ import LoadingScreen from './src/components/LoadingScreen';
 import RootNav from './src/navigation/RootNav';
 import { Provider } from 'react-redux';
 import Toast from 'react-native-toast-message';
-
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 import { store } from './src/utils/Store';  // Import your store
 
