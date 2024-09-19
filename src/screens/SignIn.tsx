@@ -12,6 +12,8 @@ import { useNavigation } from '@react-navigation/native';
 import { useDispatch } from 'react-redux';
 import { login } from '../utils/Slice';
 import Toast from 'react-native-toast-message';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import LoadingScreen from '../components/LoadingScreen';
 
 type RootStackParamList = {
   SignIn: undefined;
@@ -29,12 +31,13 @@ type Props = {
   navigation: SignInScreenNavigationProp;
 };
 
+
 const SignInScreen: React.FC<Props> = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const navigation = useNavigation();
   const dispatch = useDispatch();
-
+const apiUrl = process.env.EXPO_PUBLIC_API;
   const handleSignIn = async () => {
     if (!email || !password) {
       Toast.show({
@@ -47,23 +50,70 @@ const SignInScreen: React.FC<Props> = () => {
     }
 
     try {
-      await dispatch(login());
-      // Replace with your actual service call
-      // await Data("a", "b");
+      const req= await fetch(`${apiUrl}auth/login`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ 
+          email:email,
+          password:password
+         }),
+      });/*
+console.log('API URL:', `${apiUrl}/auth/login`);
+console.log('Request Body:', JSON.stringify({ 
+  email: email,
+  password: password
+}));*/
+  
+      const res = await req.json();
+<LoadingScreen startAsync={res} onFinish={() => {}} onError={(err) => {
+  Toast.show({
+    type: 'error',
+    position: 'top',
+    text1: 'Error',
+    text2: 'An error occurred during sign-in. Please try again.',
+  });
+}} />
+      console.log(res);
+      if (!req.ok) {
+        throw new Error(res.message);
+        return;
+      }
+      //save res.token in async storage
+      dispatch(login())
+      await AsyncStorage.setItem('token', res.token);
+      await AsyncStorage.setItem('user', JSON.stringify({
+        name: res.user.username,
+        role: res.user.role,
+        phoneNumber: res.user.phone,
+        email: res.user.email,
+        image: res.user.image,
+      }));
 
       Toast.show({
         type: 'success',
         position: 'top',
         text1: 'Sign In',
-        text2: `Welcome, ${email}`,
+        text2: `Welcome, ${res.user.username}`,
       });
 
       // TODO: Implement actual role-based navigation
-      const role = email; // Replace with your actual logic
+      const role = res.user.role;
+
       if (role === 'admin') {
         navigation.navigate('AdminHome' as never);
-      } else {
+      } else if (role === 'user') {
         navigation.navigate('Home' as never);
+      }
+      else{
+        //show err
+        Toast.show({
+          type: 'error',
+          position: 'top',
+          text1: 'Error',
+          text2: 'Invalid Role',
+        });
       }
     } catch (error) {
       Toast.show({

@@ -7,6 +7,7 @@ import { StackNavigationProp } from '@react-navigation/stack';
 import { useDispatch, useSelector } from 'react-redux';
 import { updateField } from '../utils/JsonSlice';
 import ProfileModal from '../components/ProfileModal';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 type RootStackParamList = {
   RideBookingScreen: undefined;
@@ -29,7 +30,7 @@ const RideBookingScreen: React.FC<Props> = ({ navigation }) => {
   const [selectedMeridiem, setSelectedMeridiem] = useState('AM');
   const [showTimePicker, setShowTimePicker] = useState(false);
   const [modalVisible, setModalVisible] = useState(false);
-
+const apiUrl = process.env.EXPO_PUBLIC_API;
   const dispatch = useDispatch();
   const jsonData = useSelector((state: any) => state.jsonData.data);
 
@@ -81,7 +82,30 @@ const RideBookingScreen: React.FC<Props> = ({ navigation }) => {
     console.log('Toggling profile modal. Current state:', modalVisible);
     setModalVisible(!modalVisible);
   };
+const booking = async() => {
+  const token = await AsyncStorage.getItem('token');
+const req= await fetch(`${apiUrl}booking/createbooking`, {
+  method:'POST',
+  headers: {
+    'Content-Type': 'application/json',
+    'Authorization': 'Bearer ' + token,
+  },
+  body: JSON.stringify({ 
+    sourceLocation:jsonData.source.label,
+    destinationLocation:jsonData.destination.label,
+    pickupPoint:jsonData.pickupPoint.label,
+    departureTime:jsonData.departureTime,
+    seats:jsonData.passengerno,
+    startDate: jsonData.date,
+    endDate: jsonData.date,
+   }),
+});
+const res = await req.json();
+console.log(res);
+if (req.status !== 201) throw new Error(res.message);
+else navigation.navigate('Booking');
 
+}
   return (
     <ScrollView className="flex-1 bg-gray-100">
       {/* Top Section */}
@@ -184,7 +208,7 @@ const RideBookingScreen: React.FC<Props> = ({ navigation }) => {
 
         {/* Done Button */}
         <TouchableOpacity
-          onPress={() => navigation.navigate('Booking')}
+          onPress={booking}
           className="bg-[#8CC63F] py-3 px-10 rounded-full items-center"
         >
           <Text className="text-white font-bold text-lg">DONE</Text>

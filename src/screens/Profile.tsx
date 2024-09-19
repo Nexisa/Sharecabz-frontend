@@ -15,7 +15,7 @@ import { StackNavigationProp } from '@react-navigation/stack';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useDispatch, useSelector } from 'react-redux';
 import { logout } from '../utils/Slice';
-
+import AsyncStorage from '@react-native-async-storage/async-storage';
 const { width } = Dimensions.get('window');
 
 // Define the navigation prop type
@@ -34,7 +34,8 @@ const ProfileScreen: React.FC<Props> = ({ navigation }) => {
   const [isChanged, setIsChanged] = useState(false);
   
   const data=useSelector((state:any) => state.profileData?.data);
-  console.log(data);
+  
+  
   const [userData, setUserData] = useState({
     name: 'Sonia',
     phoneNumber: '+91 XXXXXXXXXX',
@@ -42,6 +43,14 @@ const ProfileScreen: React.FC<Props> = ({ navigation }) => {
     password: '**********',
     feedback: '',
   });
+  const loaddata = async () => {
+    await AsyncStorage.getItem('user').then((user) => {
+      if (user) {
+        setUserData(JSON.parse(user));
+      }
+    });
+  }
+  loaddata();
 const dispatch = useDispatch();
   // Refs for each input field
   const inputRefs = {
@@ -67,8 +76,11 @@ const dispatch = useDispatch();
   const handleSignOut = () => {
     Alert.alert('Sign Out', 'Are you sure you want to sign out?', [
       { text: 'Cancel', style: 'cancel' },
-      { text: 'Yes', onPress: () =>
+      { text: 'Yes', onPress: async() =>
       {
+        
+    await AsyncStorage.removeItem('user');
+    await AsyncStorage.removeItem('token');
         dispatch(logout()),
         navigation.navigate('SignIn' as never) }}
     ]);
@@ -138,6 +150,7 @@ const dispatch = useDispatch();
         <TouchableOpacity onPress={handleBackPress} className="p-2">
           <Ionicons name="arrow-back" size={24} color="black" />
         </TouchableOpacity>
+
         <Image
           source={require('../../assets/Images/try.png')}
           className="w-28 h-28 self-end"
