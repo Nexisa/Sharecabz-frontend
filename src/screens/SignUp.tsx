@@ -43,6 +43,7 @@ const SignUpScreen: React.FC<Props> = ({ navigation }) => {
   });
   const [isOTPSent, setIsOTPSent] = useState(false);
 
+  const apiUrl = process.env.EXPO_PUBLIC_API;
   const handleChange = (name: keyof FormData, value: string) => {
     setFormData({
       ...formData,
@@ -101,7 +102,7 @@ const SignUpScreen: React.FC<Props> = ({ navigation }) => {
     }
   };
 
-  const handleSendOTP = () => {
+  const handleSendOTP = async() => {
     if (!isValidEmail(formData.email)) {
       Toast.show({
         type: 'error',
@@ -111,20 +112,58 @@ const SignUpScreen: React.FC<Props> = ({ navigation }) => {
       });
       return;
     }
-
-    setIsOTPSent(true);
+    if (!apiUrl) {
+      Toast.show({
+        type: 'error',
+        position: 'top',
+        text1: 'Error',
+        text2: 'API URL is not defined',
+      });
+      return false;}
+      
+    const request = await fetch(apiUrl, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(
+        {email: formData.email}
+      ),
+    });
+  const response = await request.json();
+    if(response.ok){
+      setIsOTPSent(true);
     Toast.show({
       type: 'success',
       position: 'top',
       text1: 'OTP Sent',
       text2: 'Please check your email for the OTP',
-    });
-  };
-
-  const handleVerify = async (otp: string) => {
-    // Implement your OTP verification logic here
+    });}
+    else{
+      Toast.show({
+        type: 'error',
+        position: 'top',
+        text1: 'Error',
+        text2: response.message || 'An error occurred while sending OTP',
+      });
+    }
   
-    const isVerified = true;
+  }
+  const handleVerify = async (otp: string) => {
+    
+    
+if(otp.length < 4){
+  Toast.show({
+    type: 'error',
+    position: 'top',
+    text1: 'Error',
+    text2: 'Please enter a valid OTP',
+  });
+  return false;
+}
+   
+  let isVerified = false;
+  
 
     Toast.show({
       type: isVerified ? 'success' : 'error',
