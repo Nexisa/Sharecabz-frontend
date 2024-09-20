@@ -6,7 +6,8 @@ import {
   TouchableOpacity,
   TextInput,
   ScrollView,
-  Dimensions
+  Dimensions,
+  Alert
 } from 'react-native';
 import { Ionicons, FontAwesome } from '@expo/vector-icons';
 import * as ImagePicker from 'expo-image-picker';
@@ -14,9 +15,9 @@ import { StackNavigationProp } from '@react-navigation/stack';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useDispatch, useSelector } from 'react-redux';
 import { logout } from '../utils/Slice';
+import { updateProfile } from '../utils/ProfileSlice';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import Toast from 'react-native-toast-message';
-import { Alert } from 'react-native';
 
 const { width } = Dimensions.get('window');
 
@@ -36,17 +37,16 @@ const ProfileScreen: React.FC<Props> = ({ navigation }) => {
   const [isChanged, setIsChanged] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
 
-  const data = useSelector((state: any) => state.profileData?.data);
+  const dispatch = useDispatch();
+  const profileData = useSelector((state: any) => state.profileData.data); // Accessing profile data from Redux
 
   const [userData, setUserData] = useState({
-    name: 'Sonia',
-    phoneNumber: '+91 XXXXXXXXXX',
-    email: 'abc@gmail.com',
+    name: profileData.name || 'Sonia',
+    phoneNumber: profileData.phone || '+91 XXXXXXXXXX',
+    email: profileData.email || 'abc@gmail.com',
     password: '**********',
     feedback: '',
   });
-
-  const dispatch = useDispatch();
 
   const inputRefs = {
     name: useRef<TextInput>(null),
@@ -74,6 +74,12 @@ const ProfileScreen: React.FC<Props> = ({ navigation }) => {
       if (user) {
         const parsedUser = JSON.parse(user);
         setUserData(parsedUser);
+        
+        // Dispatching actions for each field to Redux
+        for (const [key, value] of Object.entries(parsedUser)) {
+          dispatch(updateProfile({ field: key, value }));
+        }
+
         if (parsedUser.profileImage) {
           setProfileImage({ uri: parsedUser.profileImage });
         }
@@ -84,7 +90,7 @@ const ProfileScreen: React.FC<Props> = ({ navigation }) => {
       Toast.show({
         type: 'error',
         text1: 'Error',
-        text2: 'Failed to load user data'
+        text2: 'Failed to load user data',
       });
     }
   };
@@ -94,50 +100,43 @@ const ProfileScreen: React.FC<Props> = ({ navigation }) => {
     navigation.goBack();
   };
 
-
-
   const handleSignOut = () => {
-      console.log('Sign out initiated');
-      Alert.alert(
-        'Sign Out',
-        'Are you sure you want to sign out?',
-        [
-          {
-            text: 'Cancel',
-            style: 'cancel',
+    Alert.alert(
+      'Sign Out',
+      'Are you sure you want to sign out?',
+      [
+        {
+          text: 'Cancel',
+          style: 'cancel',
+        },
+        {
+          text: 'Sign Out',
+          onPress: async () => {
+            try {
+              await AsyncStorage.removeItem('user');
+              await AsyncStorage.removeItem('token');
+              dispatch(logout());
+              navigation.navigate('SignIn');
+              Toast.show({
+                type: 'success',
+                text1: 'Success',
+                text2: 'You have been signed out',
+              });
+            } catch (error) {
+              console.error('Error during sign out:', error);
+              Toast.show({
+                type: 'error',
+                text1: 'Error',
+                text2: 'Failed to sign out',
+              });
+            }
           },
-          {
-            text: 'Sign Out',
-            onPress: async () => {
-              console.log('Sign out confirmed');
-              try {
-                await AsyncStorage.removeItem('user');
-                await AsyncStorage.removeItem('token');
-                dispatch(logout());
-                navigation.navigate('SignIn');
-                console.log('Sign out successful');
-                Toast.show({
-                  type: 'success',
-                  text1: 'Success',
-                  text2: 'You have been signed out',
-                });
-              } catch (error) {
-                console.error('Error during sign out:', error);
-                Toast.show({
-                  type: 'error',
-                  text1: 'Error',
-                  text2: 'Failed to sign out',
-                });
-              }
-            },
-          },
-        ]
-      );
+        },
+      ]
+    );
   };
-  
 
   const handleChangeProfileImage = async () => {
-    console.log('Changing profile image');
     try {
       let result = await ImagePicker.launchImageLibraryAsync({
         mediaTypes: ImagePicker.MediaTypeOptions.Images,
@@ -151,11 +150,10 @@ const ProfileScreen: React.FC<Props> = ({ navigation }) => {
         if (selectedAsset.uri) {
           setProfileImage({ uri: selectedAsset.uri });
           setIsChanged(true);
-          console.log('Profile image updated:', selectedAsset.uri);
           Toast.show({
             type: 'success',
             text1: 'Success',
-            text2: 'Profile image updated'
+            text2: 'Profile image updated',
           });
         } else {
           throw new Error('Selected image has no URI');
@@ -166,14 +164,12 @@ const ProfileScreen: React.FC<Props> = ({ navigation }) => {
       Toast.show({
         type: 'error',
         text1: 'Error',
-        text2: 'Failed to update profile image'
+        text2: 'Failed to update profile image',
       });
     }
   };
 
   const handleEdit = (field: keyof typeof userData, value: string) => {
-    console.log(`Editing ${field}:`, value);
-
     if (field === 'name') {
       const nameValid = /^[a-zA-Z\s]+$/.test(value);
       if (!nameValid) {
@@ -216,12 +212,13 @@ const ProfileScreen: React.FC<Props> = ({ navigation }) => {
       }
     }
 
+    // Dispatch the action to update Redux state
+    dispatch(updateProfile({ field, value }));
     setUserData((prev) => ({ ...prev, [field]: value }));
     setIsChanged(true);
   };
 
   const handleConfirmChanges = async () => {
-    console.log('Confirming changes');
     setIsLoading(true);
     try {
       const token = await AsyncStorage.getItem('token');
@@ -229,9 +226,7 @@ const ProfileScreen: React.FC<Props> = ({ navigation }) => {
         throw new Error('No authentication token found');
       }
 
-      console.log('Sending update request');
       const apiUrl = `${process.env.EXPO_PUBLIC_API}/user/update`;
-
       const formData = new FormData();
       formData.append('username', userData.name);
       formData.append('phone', userData.phoneNumber);
@@ -242,7 +237,7 @@ const ProfileScreen: React.FC<Props> = ({ navigation }) => {
         formData.append('image', {
           uri: profileImage.uri,
           name: 'profileImage.jpg',
-          type: 'image/jpeg'
+          type: 'image/jpeg',
         });
       }
 
@@ -250,28 +245,29 @@ const ProfileScreen: React.FC<Props> = ({ navigation }) => {
         method: 'PUT',
         headers: {
           'Authorization': `Bearer ${token}`,
-          'Content-Type': 'multipart/form-data'
+          'Content-Type': 'multipart/form-data',
         },
-        body: formData
+        body: formData,
       });
 
       if (response.ok) {
         const responseData = await response.json();
-        console.log('Response data:', responseData);
         Toast.show({
           type: 'success',
           text1: 'Success',
-          text2: 'Profile updated successfully'
+          text2: 'Profile updated successfully',
         });
         setIsChanged(false);
-        
+
         const updatedUserData = { ...userData, profileImage: profileImage?.uri };
         await AsyncStorage.setItem('user', JSON.stringify(updatedUserData));
-
         setUserData(updatedUserData);
+        // Update Redux with the new data
+        for (const [key, value] of Object.entries(updatedUserData)) {
+          dispatch(updateProfile({ field: key, value }));
+        }
       } else {
         const errorText = await response.text();
-        console.error('Error response:', errorText);
         throw new Error(`Server responded with status ${response.status}: ${errorText}`);
       }
     } catch (error) {
@@ -279,7 +275,7 @@ const ProfileScreen: React.FC<Props> = ({ navigation }) => {
       Toast.show({
         type: 'error',
         text1: 'Error',
-        text2: `Failed to update profile: ${error.message}`
+        text2: `Failed to update profile: ${error.message}`,
       });
     } finally {
       setIsLoading(false);
@@ -287,7 +283,6 @@ const ProfileScreen: React.FC<Props> = ({ navigation }) => {
   };
 
   const openKeyboard = (field: keyof typeof inputRefs) => {
-    console.log(`Opening keyboard for ${field}`);
     inputRefs[field].current?.focus();
   };
 
@@ -300,13 +295,11 @@ const ProfileScreen: React.FC<Props> = ({ navigation }) => {
 
   return (
     <SafeAreaView className='p-4'>
-      <ScrollView contentContainerStyle={{ flexGrow: 1 }} >
-        {/* Header with Back Button and Logo */}
+      <ScrollView contentContainerStyle={{ flexGrow: 1 }}>
         <View className="flex-row justify-between items-center mb-5">
           <TouchableOpacity onPress={handleBackPress} className="p-2">
             <Ionicons name="arrow-back" size={24} color="black" />
           </TouchableOpacity>
-
           <Image
             source={require('../../assets/Images/try.png')}
             className="w-28 h-28 self-end"
@@ -314,7 +307,6 @@ const ProfileScreen: React.FC<Props> = ({ navigation }) => {
           />
         </View>
 
-        {/* Profile Section */}
         <View className="items-center mb-8">
           <View className="relative">
             <TouchableOpacity onPress={handleChangeProfileImage} className="flex items-center">
@@ -332,11 +324,8 @@ const ProfileScreen: React.FC<Props> = ({ navigation }) => {
           <Text className="text-gray-500">{userData.phoneNumber}</Text>
         </View>
 
-        {/* Info Section */}
         <View className="w-full bg-gray-100 rounded-lg p-5 mb-8">
-          {(['name', 'phoneNumber', 'email', 'password', 'feedback'] as Array<
-            keyof typeof userData
-          >).map((field, index) => (
+          {(['name', 'phoneNumber', 'email', 'password', 'feedback'] as Array<keyof typeof userData>).map((field, index) => (
             <View className="mb-4" key={index}>
               <Text className="font-bold mb-1">
                 {field.charAt(0).toUpperCase() + field.slice(1)}
@@ -344,17 +333,13 @@ const ProfileScreen: React.FC<Props> = ({ navigation }) => {
               <View className="flex-row items-center border-b border-gray-300">
                 <TextInput
                   ref={inputRefs[field]}
-                  className={`flex-1 text-lg p-2 ${errors[field] ? 'border-b border-red-500' : ''
-                    }`}
+                  className={`flex-1 text-lg p-2 ${errors[field] ? 'border-b border-red-500' : ''}`}
                   value={userData[field]}
                   onChangeText={(text) => handleEdit(field, text)}
                   placeholder={`Enter your ${field}`}
                   secureTextEntry={field === 'password'}
                 />
-                <TouchableOpacity
-                  onPress={() => openKeyboard(field)}
-                  className="ml-2"
-                >
+                <TouchableOpacity onPress={() => openKeyboard(field)} className="ml-2">
                   <FontAwesome name="pencil" size={18} color="gray" />
                 </TouchableOpacity>
               </View>
@@ -365,7 +350,6 @@ const ProfileScreen: React.FC<Props> = ({ navigation }) => {
           ))}
         </View>
 
-        {/* Sign Out and Confirm Changes Buttons */}
         <View className="flex-row justify-between w-full px-6">
           <TouchableOpacity
             className={`w-2/5 p-4 rounded-xl ${isChanged ? 'bg-green-500' : 'bg-gray-300'} mr-8`}
