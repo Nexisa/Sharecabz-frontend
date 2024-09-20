@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, Text, TouchableOpacity, ScrollView, Image } from 'react-native';
+import { View, Text, TouchableOpacity, ScrollView, Image, Alert } from 'react-native';
 import { FontAwesome, Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import DateTimePicker, { DateTimePickerEvent } from '@react-native-community/datetimepicker';
@@ -30,7 +30,9 @@ const RideBookingScreen: React.FC<Props> = ({ navigation }) => {
   const [selectedMeridiem, setSelectedMeridiem] = useState('AM');
   const [showTimePicker, setShowTimePicker] = useState(false);
   const [modalVisible, setModalVisible] = useState(false);
-const apiUrl = process.env.EXPO_PUBLIC_API;
+  const [isLoading, setIsLoading] = useState(false);
+
+  const apiUrl = process.env.EXPO_PUBLIC_API;
   const dispatch = useDispatch();
   const jsonData = useSelector((state: any) => state.jsonData.data);
 
@@ -55,14 +57,14 @@ const apiUrl = process.env.EXPO_PUBLIC_API;
     if (selectedDate) {
       let hours = selectedDate.getHours();
       let minutes = selectedDate.getMinutes();
-      
-      // Round minutes to nearest 15-minute interval
+
+      // Round minutes to nearest 15
       minutes = Math.round(minutes / 15) * 15;
       if (minutes === 60) {
         hours += 1;
         minutes = 0;
       }
-      
+
       const ampm = hours >= 12 ? 'PM' : 'AM';
       const newHour = (hours % 12 || 12).toString().padStart(2, '0');
       const newMinute = minutes.toString().padStart(2, '0');
@@ -74,38 +76,54 @@ const apiUrl = process.env.EXPO_PUBLIC_API;
   };
 
   const handleBackPress = () => {
-    console.log('Back button pressed');
     navigation.goBack();
   };
 
   const toggleProfileModal = () => {
-    console.log('Toggling profile modal. Current state:', modalVisible);
     setModalVisible(!modalVisible);
   };
-const booking = async() => {
-  const token = await AsyncStorage.getItem('token');
-const req= await fetch(`${apiUrl}booking/createbooking`, {
-  method:'POST',
-  headers: {
-    'Content-Type': 'application/json',
-    'Authorization': 'Bearer ' + token,
-  },
-  body: JSON.stringify({ 
-    sourceLocation:jsonData.source.label,
-    destinationLocation:jsonData.destination.label,
-    pickupPoint:jsonData.pickupPoint.label,
-    departureTime:jsonData.departureTime,
-    seats:jsonData.passengerno,
-    startDate: jsonData.date,
-    endDate: jsonData.date,
-   }),
-});
-const res = await req.json();
-console.log(res);
-if (req.status !== 201) throw new Error(res.message);
-else navigation.navigate('Booking');
 
-}
+  const booking = async () => {
+    try {
+      setIsLoading(true);
+      const token = await AsyncStorage.getItem('token');
+      if (!token) {
+        Alert.alert("Error", "Authentication token not found.");
+        setIsLoading(false);
+        return;
+      }
+
+      const response = await fetch(`${apiUrl}/booking/createbooking`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
+        },
+        body: JSON.stringify({ 
+          sourceLocation: jsonData.source?.label || '',
+          destinationLocation: jsonData.destination?.label || '',
+          pickupPoint: jsonData.pickupPoint?.label || '',
+          departureTime: jsonData.departureTime || '',
+          seats: jsonData.seats || 1,
+          startDate: jsonData.date || '',
+          endDate: jsonData.date || '',
+        }),
+      });
+      const result = await response.json();
+
+      if (response.status !== 201) {
+        Alert.alert("Booking Error", result.message);
+      } else {
+        navigation.navigate('Booking');
+      }
+    } catch (error: any) {
+      console.error("Booking error:", error.message);
+      Alert.alert("Booking Error", "An error occurred while booking. Please try again.");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   return (
     <ScrollView className="flex-1 bg-gray-100">
       {/* Top Section */}
@@ -125,9 +143,9 @@ else navigation.navigate('Booking');
           colors={['#84FAB0', '#8FD3F4']}
           className="flex-row justify-between items-center p-6 rounded-lg mb-4"
         >
-          <Text className="text-lg font-bold">{jsonData.source.label}</Text>
+          <Text className="text-lg font-bold">{jsonData.source?.label || 'Source not selected'}</Text>
           <FontAwesome name="bus" size={24} color="black" />
-          <Text className="text-lg font-bold">{jsonData.destination.label}</Text>
+          <Text className="text-lg font-bold">{jsonData.destination?.label || 'Destination not selected'}</Text>
           <Text className="text-sm font-light">2 hrs</Text>
         </LinearGradient>
 
@@ -200,18 +218,18 @@ else navigation.navigate('Booking');
         </View>
         <View className="flex items-center mb-4">
           <FontAwesome name="suitcase" size={24} color="black" />
-          <Text className="text-sm mt-1">1 Trolley & 1 Handbag per seat</Text>
+          <Text className="text-sm mt-1">1 Cabin Luggage</Text>
         </View>
+      </View>
 
-        {/* Window Seat Note */}
-        <Text className="text-xs text-red-600 text-center mb-4">*Window seat price may be different</Text>
-
-        {/* Done Button */}
+      {/* Booking Button */}
+      <View className="mx-8 mb-8">
         <TouchableOpacity
           onPress={booking}
-          className="bg-[#8CC63F] py-3 px-10 rounded-full items-center"
+          disabled={isLoading}
+          className={`bg-[#8CC63F]  p-4 rounded-lg shadow-md ${isLoading ? 'opacity-50' : ''}`}
         >
-          <Text className="text-white font-bold text-lg">DONE</Text>
+          <Text className="text-white text-center font-bold">{isLoading ? 'Booking...' : 'DONE'}</Text>
         </TouchableOpacity>
       </View>
     </ScrollView>

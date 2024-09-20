@@ -18,6 +18,7 @@ interface ProfileModalProps {
 
 const ProfileModal: React.FC<ProfileModalProps> = () => {
   const navigation = useNavigation();
+  const [modalVisible, setModalVisible] = useState(false);
 
   // Retrieve user data from Redux store
   const { name, pic } = useSelector((state: any) => state.profileData.data); // Adjust state path if necessary
@@ -28,7 +29,7 @@ const ProfileModal: React.FC<ProfileModalProps> = () => {
 
   const handleModalClose = (screen: string) => {
     navigation.navigate(screen as never);
-    toggleModal(); // Call the toggle function passed as a prop
+    setModalVisible(!modalVisible);
   };
 
   const screenWidth = Dimensions.get('window').width;

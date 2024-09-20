@@ -5,10 +5,13 @@ import { useNavigation, useRoute } from '@react-navigation/native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const UserDetailPage = () => {
-  const navigation = useNavigation();
-  const route = useRoute();
-  //get bookingId from prev screen
+  // Use 'any' for navigation and route to avoid type errors
+  const navigation = useNavigation<any>();
+  const route = useRoute<any>();
+
+  // Get bookingId from route parameters
   const bookingId = route.params?.bookingId;
+
   // State to store user details fetched from API
   const [userDetails, setUserDetails] = useState({
     email: '',
@@ -21,12 +24,19 @@ const UserDetailPage = () => {
     totalSeats: '',
     paymentStatus: '',
   });
-const api = process.env.EXPO_PUBLIC_API;
+
+  // Replace this with your actual API endpoint
+  const api = process.env.EXPO_PUBLIC_API;
+
   // Function to fetch user details from API
   const fetchUserDetails = async () => {
     try {
-      // Fetch data from the API
       const token = await AsyncStorage.getItem('token');
+      if (!token) {
+        console.log('No token found');
+        return;
+      }
+
       const response = await fetch(`${api}/booking/getbooking/${bookingId}`, {
         method: 'GET',
         headers: {
@@ -34,10 +44,14 @@ const api = process.env.EXPO_PUBLIC_API;
           'Authorization': `Bearer ${token}`,
         },
       });
-      const res=await response.json();
+
+      if (!response.ok) {
+        console.log('Error fetching user details:', response.statusText);
+        return;
+      }
+
+      const res = await response.json();
       const data = res.booking;
-      //console.log('User details:', data);
-      // Set the state with the fetched data
       setUserDetails({
         email: data.userId.email,
         phone: data.userId.phone,
@@ -45,7 +59,7 @@ const api = process.env.EXPO_PUBLIC_API;
         destinationLocation: data.destinationLocation,
         pickupLocation: data.pickupPoint,
         date: data.startDate,
-        time: data.time,
+        time: data.departureTime,
         totalSeats: data.seats,
         paymentStatus: data.paymentStatus,
       });
@@ -56,30 +70,30 @@ const api = process.env.EXPO_PUBLIC_API;
 
   useEffect(() => {
     // Fetch user details on component mount
-    fetchUserDetails();
-  }, []);
+    if (bookingId) {
+      fetchUserDetails();
+    }
+  }, [bookingId]);
 
   const handleBackPress = () => {
-    console.log('Back button pressed');
     navigation.goBack();
   };
 
   return (
     <ScrollView contentContainerStyle={styles.container}>
-      <View className="absolute top-1 left-0 right-0 flex-row px-2 ">
-        {/* Back Icon on the left */}
-        <TouchableOpacity onPress={handleBackPress} className="p-2 mt-14 ">
+      <View className="absolute top-1 left-0 right-0 flex-row px-2">
+        <TouchableOpacity onPress={handleBackPress} className="p-2 mt-14">
           <Ionicons name="arrow-back" size={24} color="black" />
         </TouchableOpacity>
-        <Text className="p-2 mt-14 ">User Booking Details</Text>
+        <Text className="p-2 mt-14">User Booking Details</Text>
       </View>
 
       <View style={styles.userDetail}>
         <Image
           style={styles.avatar}
-          source={require('../../../assets/Images/profile_image.png')} 
+          source={require('../../../assets/Images/profile_image.png')}
         />
-        <Text style={styles.name}>{userDetails.username || "N/A"}</Text>
+        <Text style={styles.name}>{userDetails.email || 'N/A'}</Text>
         <Text style={styles.username}>{userDetails.email}</Text>
       </View>
 
@@ -87,54 +101,38 @@ const api = process.env.EXPO_PUBLIC_API;
       <View style={styles.detailsContainer}>
         <Text style={styles.title}>Email</Text>
         <TextInput style={styles.input} value={userDetails.email} editable={false} />
-        
+
         <Text style={styles.title}>Phone</Text>
         <TextInput style={styles.input} value={userDetails.phone} editable={false} />
-        
+
         <Text style={styles.title}>Source Location</Text>
         <TextInput style={styles.input} value={userDetails.sourceLocation} editable={false} />
-        
+
         <Text style={styles.title}>Destination Location</Text>
         <TextInput style={styles.input} value={userDetails.destinationLocation} editable={false} />
-        
+
         <Text style={styles.title}>Pickup Location</Text>
         <TextInput style={styles.input} value={userDetails.pickupLocation} editable={false} />
-        
+
         <Text style={styles.title}>Date</Text>
-        <TextInput style={styles.input} value={userDetails.date} editable={false}/>
-        
+        <TextInput style={styles.input} value={userDetails.date} editable={false} />
+
         <Text style={styles.title}>Time</Text>
-        <TextInput style={styles.input} value={userDetails.time} editable={false}/>
-        
+        <TextInput style={styles.input} value={userDetails.time} editable={false} />
+
         <Text style={styles.title}>Total Seats</Text>
         <TextInput style={styles.input} value={userDetails.totalSeats} editable={false} />
+      </View>
 
-        {/* Payment Status */}
-        {/* <View style={styles.statusContainer}>
-          <Text style={styles.statusLabel}>Payment Status</Text>
-<<<<<<< HEAD
-<<<<<<< HEAD
-          <Text style={styles.statusCompleted}>Completed{userDetails.paymentStatus}</Text>
-        </View>
-=======
-      
-        </View> */}
->>>>>>> c5acdc6 (new)
-=======
-      
-        </View> */}
->>>>>>> a3d94b4549e49f3e2a8f85435b2ddd626a88f554
+      {/* Buttons */}
+      <View style={styles.buttonContainer}>
+        <TouchableOpacity onPress={() => navigation.navigate('AdminHome')} style={styles.cancelButton}>
+          <Text style={styles.cancelButtonText}>Cancel</Text>
+        </TouchableOpacity>
 
-        {/* Buttons */}
-        <View style={styles.buttonContainer}>
-          <TouchableOpacity onPress={() => navigation.navigate('AdminHome' as never)} style={styles.cancelButton}>
-            <Text style={styles.cancelButtonText}>Cancel</Text>
-          </TouchableOpacity>
-
-          <TouchableOpacity onPress={() => navigation.navigate('DriverAllocation' as never,{bookingId} as never)} style={styles.nextButton}>
-            <Text style={styles.nextButtonText}>Next Page</Text>
-          </TouchableOpacity>
-        </View>
+        <TouchableOpacity onPress={() => navigation.navigate('DriverAllocation', { bookingId })} style={styles.nextButton}>
+          <Text style={styles.nextButtonText}>Next Page</Text>
+        </TouchableOpacity>
       </View>
     </ScrollView>
   );
@@ -181,21 +179,6 @@ const styles = StyleSheet.create({
     marginBottom: 15,
     backgroundColor: '#f0f0f0',
     color: '#333',
-  },
-  statusContainer: {
-    marginBottom: 20,
-  },
-  statusLabel: {
-    fontSize: 16,
-    fontWeight: 'bold',
-    color: '#333',
-    padding: 5,
-  },
-  statusCompleted: {
-    fontSize: 20,
-    color: '#28a745', // Green color for completed
-    fontWeight: 'bold',
-    padding: 5,
   },
   buttonContainer: {
     flexDirection: 'row',

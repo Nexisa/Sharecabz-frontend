@@ -13,8 +13,8 @@ import { useDispatch } from 'react-redux';
 import { login } from '../utils/Slice';
 import Toast from 'react-native-toast-message';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import LoadingScreen from '../components/LoadingScreen';
 import Loading from '../components/Loading';
+// import AdminHome from './Admin/AdminHome';
 
 type RootStackParamList = {
   SignIn: undefined;
@@ -28,134 +28,97 @@ type SignInScreenNavigationProp = StackNavigationProp<
   'SignIn'
 >;
 
-type Props = {
-  navigation: SignInScreenNavigationProp;
-};
-
-
-const SignInScreen: React.FC<Props> = () => {
+const SignInScreen: React.FC = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [eye, setEye] = useState(true);
   const [loading, setLoading] = useState(false);
-  const navigation = useNavigation();
+  const navigation = useNavigation<SignInScreenNavigationProp>();
   const dispatch = useDispatch();
-const apiUrl = process.env.EXPO_PUBLIC_API;
+  const apiUrl = process.env.EXPO_PUBLIC_API;
+
   const handleSignIn = async () => {
     if (!email || !password) {
-      Toast.show({
-        type: 'error',
-        position: 'top',
-        text1: 'Error',
-        text2: 'Please fill in all fields',
-      });
+      showToast('error', 'Please fill in all fields');
       return;
     }
-let res;
+  
+    setLoading(true);
     try {
-
-      const req= await fetch(`${apiUrl}/auth/login`, {
+      const req = await fetch(`${apiUrl}/auth/login`, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ 
-          email:email,
-          password:password
-         }),
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, password }),
       });
-   
-    
-console.log('API URL:', `${apiUrl}/auth/login`);
-console.log('Request Body:', JSON.stringify({ 
-  email: email,
-  password: password
-}));
   
-try {
-  const textResponse = await req.text();
-  try {
-    res = JSON.parse(textResponse); // Parse JSON if it's valid
-  } catch (err) {
-    console.error('Error parsing JSON:', err);
-    res = { message: textResponse }; // Fallback for non-JSON responses
-  }
+      const res = await handleApiResponse(req);
   
-  console.log('Response:', res);
-}
- catch (error) {  
-  console.error('Error:', error);
-  res = { message: 'An error occurred. Please try again.' };
-}
-/*
-<LoadingScreen startAsync={res} onFinish={() => {}} onError={(err) => {
-  Toast.show({
-    type: 'error',
-    position: 'top',
-    text1: 'Error',
-    text2: 'An error occurred during sign-in. Please try again.',
-  });
-}} />*/
- console.log('sss');
-      console.log(res);
-      if (!req.ok) {
-        console.log('Error:', res);
-        return;
+      if (!res || !req.ok) {
+        throw new Error(res?.message || 'Login failed');
       }
+  
+      await saveUserData(res);
+      showToast('success', `Welcome, ${res.user.username}`);
+      handleNavigation(res.user.role);
+  
+    } catch (error: unknown) {
+      if (error instanceof Error) {
+        showToast('error', error.message);
+      } else {
+        showToast('error', 'An unknown error occurred during sign-in.');
+      }
+    } finally {
+      setLoading(false);
     }
-    catch (error) {
-      console.error('Error:', error);
+  };
+  
+
+  const handleApiResponse = async (req: Response) => {
+    const textResponse = await req.text();
+    try {
+      return JSON.parse(textResponse);
+    } catch (err) {
+      console.error('Error parsing response:', err);
+      return { message: textResponse };
     }
-      //save res.token in async storage
-      dispatch(login())
-      await AsyncStorage.setItem('token', res.token);
-      await AsyncStorage.setItem('user', JSON.stringify({
-        name: res.user.username,
-        role: res.user.role,
-        phoneNumber: res.user.phone,
-        email: res.user.email,
-        image: res.user.image,
-      }));
-
-      Toast.show({
-        type: 'success',
-        position: 'top',
-        text1: 'Sign In',
-        text2: `Welcome, ${res.user.username}`,
-      });
-
-      // TODO: Implement actual role-based navigation
-      const role = res.user.role;
-
-      if (role === 'admin') {
-        navigation.navigate('AdminHome' as never);
-      } else if (role === 'user') {
-        navigation.navigate('Home' as never);
-      }
-      else{
-        //show err
-        Toast.show({
-          type: 'error',
-          position: 'top',
-          text1: 'Error',
-          text2: 'Invalid Role',
-        });
-      }
-    // } catch (error) {
-    //   Toast.show({
-    //     type: 'error',
-    //     position: 'top',
-    //     text1: 'Sign In Failed',
-    //     text2: 'An error occurred during sign-in. Please try again.',
-    //   });
-   // }
   };
 
-if (loading) {
-  return <Loading visible={loading} />;
-} else {
+  const saveUserData = async (res: any) => {
+    await AsyncStorage.setItem('token', res.token);
+    await AsyncStorage.setItem('user', JSON.stringify({
+      name: res.user.username,
+      role: res.user.role,
+      phoneNumber: res.user.phone,
+      email: res.user.email,
+      image: res.user.image,
+    }));
+    dispatch(login());
+  };
+
+  const handleNavigation = (role: string) => {
+    if (role === 'admin') {
+      navigation.navigate('AdminHome' as never);
+    } else if (role === 'user') {
+      navigation.navigate('Home' as never);
+    } else {
+      showToast('error', 'Invalid Role');
+    }
+  };
+
+  const showToast = (type: 'success' | 'error', message: string) => {
+    Toast.show({
+      type,
+      position: 'top',
+      text1: type === 'success' ? 'Sign In' : 'Error',
+      text2: message,
+    });
+  };
+
+  if (loading) {
+    return <Loading visible={loading} />;
+  }
+
   return (
-    
     <View className="flex-1 bg-[#81D742] justify-center items-center">
       <View className="absolute top-0 left-0 right-0 h-52 bg-[#81D742] rounded-b-3xl" />
 
@@ -191,7 +154,7 @@ if (loading) {
 
         <TouchableOpacity
           className="self-end my-2"
-          onPress={() => navigation.navigate('ForgotPassword' as never)}
+          onPress={() => navigation.navigate('ForgotPassword')}
         >
           <Text className="text-gray-500">Forgot password?</Text>
         </TouchableOpacity>
@@ -203,19 +166,7 @@ if (loading) {
           <Text className="text-white font-bold">SIGN IN</Text>
         </TouchableOpacity>
 
-        {/* <View className="items-center my-8">
-          <Text className="text-gray-500 mb-4">Or Sign in with</Text>
-          <View className="flex-row justify-between w-44">
-            <TouchableOpacity>
-              <FontAwesome name="google" size={24} color="#4285F4" />
-            </TouchableOpacity>
-            <TouchableOpacity>
-              <FontAwesome name="facebook" size={24} color="#3b5998" />
-            </TouchableOpacity>
-          </View>
-        </View> */}
-
-        <TouchableOpacity onPress={() => navigation.navigate('SignUp' as never)}>
+        <TouchableOpacity onPress={() => navigation.navigate('SignUp')}>
           <Text className="text-center mt-5 text-gray-500">
             Don’t have an account?{' '}
             <Text className="text-[#81D742] font-bold">SIGN UP</Text>
@@ -223,10 +174,9 @@ if (loading) {
         </TouchableOpacity>
       </View>
 
-      {/* Toast Container */}
       <Toast />
     </View>
   );
 };
-};
+
 export default SignInScreen;

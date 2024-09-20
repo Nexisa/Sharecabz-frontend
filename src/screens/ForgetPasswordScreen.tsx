@@ -14,7 +14,7 @@ const ForgetPasswordScreen = () => {
   const [code, setCode] = useState(['', '', '', '']);
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
-const api=process.env.EXPO_PUBLIC_API;
+  const api = process.env.EXPO_PUBLIC_API;
   const navigation = useNavigation();
 
   const inputRefs = useRef<(TextInput | null)[]>([]); // Refs for code inputs
@@ -26,22 +26,21 @@ const api=process.env.EXPO_PUBLIC_API;
     });
   };
 
-  const handleEmailSubmit = async() => {
+  const handleEmailSubmit = async () => {
     if (!email) {
       showToast('Please enter an email');
     } else {
-      const req=await fetch(`${api}/auth/resetOtp`, {
+      const req = await fetch(`${api}/auth/resetOtp`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ email:email }),
+        body: JSON.stringify({ email: email }),
       });
-        if (req.ok) {
-          showToast('Verification code sent to email');
-        }
+      if (req.ok) {
+        showToast('Verification code sent to email');
       }
-    
+    }
   };
 
   const handleCodeChange = (index: number, value: string) => {
@@ -54,15 +53,9 @@ const api=process.env.EXPO_PUBLIC_API;
     }
   };
 
-  const handleCodeSend = () => {
-    if (code.includes('')) {
-      showToast('Please enter the complete verification code');
-    } else {
-      showToast('Verification code verified');
-    }
-  };
+  const handlePasswordReset = async () => {
+    const passwordRegex = /^(?=.*[A-Za-z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
 
-  const handlePasswordReset = async() => {
     if (!newPassword || !confirmPassword) {
       showToast('Please fill out both password fields');
       return;
@@ -71,30 +64,32 @@ const api=process.env.EXPO_PUBLIC_API;
       showToast("Passwords don't match");
       return;
     }
-    // Add further validation if needed
-    const req1= await fetch(`${api}/auth/resetPassword`, {
+    if (!passwordRegex.test(newPassword)) {
+      showToast(
+        'Password must be at least 8 characters long, contain letters, numbers, and at least one special character'
+      );
+      return;
+    }
+
+    const req1 = await fetch(`${api}/auth/resetPassword`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({ 
-        email:email,
-        otp:code.join(''),
-        confirmpassword:confirmPassword,
-        newpassword:newPassword }),
+      body: JSON.stringify({
+        email: email,
+        otp: code.join(''),
+        confirmpassword: confirmPassword,
+        newpassword: newPassword,
+      }),
     });
-    if(req1.ok){
+
+    if (req1.ok) {
       showToast('Password reset successfully');
       navigation.navigate('SignIn' as never);
+    } else {
+      showToast('Password reset failed. Try again.');
     }
-    else{
-      showToast('Password reset failed Try again');
-    }
-
-
-
-
-    showToast('Password reset successfully');
   };
 
   return (
@@ -136,7 +131,6 @@ const api=process.env.EXPO_PUBLIC_API;
             <Text style={styles.resendText}>Resend</Text>
           </Text>
         </TouchableOpacity>
-
 
         <TextInput
           style={styles.input}

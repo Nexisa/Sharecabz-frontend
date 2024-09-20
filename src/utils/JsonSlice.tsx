@@ -15,6 +15,7 @@ const initialState: JsonDataState = {
     destination: null,
     pickupPoint: null,
     date: null,
+    time:null,
     passengerno: null,
   },
 };

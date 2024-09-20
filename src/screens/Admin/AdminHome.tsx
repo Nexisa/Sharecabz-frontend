@@ -6,7 +6,9 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useDispatch } from "react-redux";
 import { logout } from "../../utils/Slice";
+import { StackNavigationProp } from '@react-navigation/stack';
 
+// Define your booking interface
 interface Booking {
   _id: string;
   username: string;
@@ -19,10 +21,20 @@ interface Booking {
   paymentStatus: string;
 }
 
+// Define navigation parameters for TypeScript
+type RootStackParamList = {
+  UserDetailPage: { bookingId: string };
+  SignIn: undefined;
+  // Add other routes as needed
+};
+
+// Define the type for your navigation prop
+type AdminHomeNavigationProp = StackNavigationProp<RootStackParamList>;
+
 const AdminHome = () => {
   const [bookings, setBookings] = useState<Booking[]>([]);
   const [sortOrder, setSortOrder] = useState<"asc" | "desc">("asc");
-  const navigation = useNavigation();
+  const navigation = useNavigation<AdminHomeNavigationProp>();
   const dispatch = useDispatch();
   const api = process.env.EXPO_PUBLIC_API;
 
@@ -72,14 +84,14 @@ const AdminHome = () => {
 
   const handlePress = (bookingId: string) => {
     // Navigate to booking details page
-    navigation.navigate("UserDetailPage" as never, { bookingId } as never);
+    navigation.navigate("UserDetailPage", { bookingId });
   };
 
-  const openmodal = async () => {
+  const openModal = async () => {
     await AsyncStorage.removeItem('user');
     await AsyncStorage.removeItem('token');
     dispatch(logout());
-    navigation.navigate('SignIn' as never);
+    navigation.navigate('SignIn');
   };
 
   return (
@@ -89,7 +101,7 @@ const AdminHome = () => {
           <Ionicons name="search" size={20} color="#999" />
           <Text style={styles.searchText}>Search By booking Id...</Text>
         </View>
-        <TouchableOpacity onPress={openmodal}>
+        <TouchableOpacity onPress={openModal}>
           <Ionicons name="menu" size={24} color="#000" />
         </TouchableOpacity>
       </View>
@@ -116,6 +128,7 @@ const AdminHome = () => {
     </SafeAreaView>
   );
 };
+
 const styles = StyleSheet.create({
   container: {
     flex: 1,
@@ -183,6 +196,5 @@ const styles = StyleSheet.create({
     textAlign: "center",
   },
 });
-
 
 export default AdminHome;
