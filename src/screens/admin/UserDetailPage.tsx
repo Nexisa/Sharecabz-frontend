@@ -110,10 +110,15 @@ const api = process.env.EXPO_PUBLIC_API;
         <TextInput style={styles.input} value={userDetails.totalSeats} editable={false} />
 
         {/* Payment Status */}
-        <View style={styles.statusContainer}>
+        {/* <View style={styles.statusContainer}>
           <Text style={styles.statusLabel}>Payment Status</Text>
+<<<<<<< HEAD
           <Text style={styles.statusCompleted}>Completed{userDetails.paymentStatus}</Text>
         </View>
+=======
+      
+        </View> */}
+>>>>>>> c5acdc6 (new)
 
         {/* Buttons */}
         <View style={styles.buttonContainer}>

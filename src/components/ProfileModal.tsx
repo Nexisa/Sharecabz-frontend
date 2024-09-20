@@ -8,28 +8,26 @@ import {
   ScrollView,
   Dimensions,
 } from 'react-native';
-import { FontAwesome } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
 import { useDispatch, useSelector } from 'react-redux';
 
 interface ProfileModalProps {
-  profileImage?: string; // Pass profile image URL if provided
   modalVisible: boolean;
   toggleModal: () => void;
 }
 
-const ProfileModal: React.FC<ProfileModalProps> = ({ profileImage }) => {
+const ProfileModal: React.FC<ProfileModalProps> = ({ modalVisible, toggleModal }) => {
   const navigation = useNavigation();
-  const [modalVisible, setModalVisible] = useState(false);
 
-const data =useSelector((state:any) => state.jsonSlice?.data);
-  const toggleModal = () => {
-    setModalVisible(!modalVisible);
-  };
+  // Use `useSelector` to get the profile data from the Redux store
+  const profileData = useSelector((state: any) => state.profileData.data);
+
+  // Destructure the necessary fields from profileData
+  const { name, pic } = profileData;
 
   const handleModalClose = (screen: string) => {
     navigation.navigate(screen as never);
-    setModalVisible(!modalVisible);
+    toggleModal(); // Call the toggle function passed as a prop
   };
 
   const screenWidth = Dimensions.get('window').width;
@@ -39,7 +37,7 @@ const data =useSelector((state:any) => state.jsonSlice?.data);
       {/* Touchable Profile Image on the Right */}
       <TouchableOpacity onPress={toggleModal} className="flex-row justify-end items-center">
         <Image
-          source={profileImage ? { uri: profileImage } : require('../../assets/Images/profile_image.png')}
+          source={pic ? { uri: pic } : require('../../assets/Images/profile_image.png')}
           className="w-12 h-12 rounded-full"
         />
       </TouchableOpacity>
@@ -55,11 +53,9 @@ const data =useSelector((state:any) => state.jsonSlice?.data);
           <View className="bg-white rounded-lg p-5" style={{ width: screenWidth * 0.8 }}>
             <ScrollView>
               <View className="items-center mb-5">
-                <Text className="text-xl font-bold mb-1">Sonia</Text>
+                <Text className="text-xl font-bold mb-1">{name || 'User Name'}</Text>
                 <View className="flex-row">
-                  <FontAwesome name="star" size={18} color="#FFD700" />
-                  <FontAwesome name="star" size={18} color="#FFD700" />
-                  <FontAwesome name="star" size={18} color="#FFD700" />
+                  {/* Additional user details or image can go here */}
                 </View>
               </View>
 
