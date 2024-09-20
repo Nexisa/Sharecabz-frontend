@@ -3,6 +3,7 @@ import { View, Text, TextInput, TouchableOpacity, Dimensions, Alert, Modal, Butt
 import { useNavigation, useRoute } from '@react-navigation/native';
 import { Ionicons } from '@expo/vector-icons';
 import Toast from 'react-native-toast-message';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const DriverAllocation = () => {
   const [driverName, setDriverName] = useState('');
@@ -19,6 +20,7 @@ const api = process.env.EXPO_PUBLIC_API;
   const { width, height } = Dimensions.get('window'); // Get screen width and height dynamically
 
   const handleDriverAllocation = async() => {
+    const token = await AsyncStorage.getItem('token');
     if (!driverName || !cabNumber || !driverNumber || !cabModel) {
       Toast.show({
         type: 'error',
@@ -28,20 +30,24 @@ const api = process.env.EXPO_PUBLIC_API;
       });
       return;
     }
-    const response = await fetch(`${api}/booking/allocateDriver`, {
-      method: 'POST',
+    const response = await fetch(`${api}/booking/getbooking/${bookingId}`, {
+      method: 'PUT',
       headers: {
         'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`,
       },
       body: JSON.stringify({
-        bookingId,
-        driverName,
-        cabNumber,
-        driverNumber,
-        cabModel,
+        driver: {
+          name: driverName, // Replace with the actual driver name
+          contactNumber: driverNumber, // Replace with the actual driver contact number
+          cabNumber: cabNumber, // Replace with the actual cab number
+          carModel: cabModel // Replace with the actual car model
+        }
       }),
     });
+
     const res = await response.json();
+    console.log('Driver Allocation Response:', res);
     if (!res.success) {
       Toast.show({
         type: 'error',
@@ -50,7 +56,7 @@ const api = process.env.EXPO_PUBLIC_API;
         text2: 'Driver allocation failed. Please try again.',
       });
     }
-    
+
     console.log('Driver allocated:', driverName, cabNumber, cabModel);
     navigation.navigate('Status' as never); // Redirect to Driver Allotment Status
   };
