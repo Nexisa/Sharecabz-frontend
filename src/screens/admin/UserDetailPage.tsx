@@ -112,7 +112,7 @@ const api = process.env.EXPO_PUBLIC_API;
         {/* Payment Status */}
         <View style={styles.statusContainer}>
           <Text style={styles.statusLabel}>Payment Status</Text>
-          <Text style={styles.statusCompleted}>Completed{userDetails.paymentStatus}</Text>
+      
         </View>
 
         {/* Buttons */}

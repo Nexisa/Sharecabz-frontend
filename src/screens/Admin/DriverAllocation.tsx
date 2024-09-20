@@ -15,18 +15,14 @@ const DriverAllocation = () => {
   const route = useRoute();
   const bookingId = route.params?.bookingId;
   const navigation = useNavigation();
-  const { width, height } = Dimensions.get('window'); // Get screen width and height dynamically
+  const { width, height } = Dimensions.get('window'); 
 
-  console.log('Booking ID:', bookingId); // Debug bookingId
+
+
+  console.log('Booking ID:', bookingId); 
 
   const handleDriverAllocation = async () => {
     const token = await AsyncStorage.getItem('token');
-    
-    console.log('Driver Name:', driverName); // Debug driver name
-    console.log('Cab Number:', cabNumber); // Debug cab number
-    console.log('Driver Number:', driverNumber); // Debug driver contact
-    console.log('Cab Model:', cabModel); // Debug cab model
-
     if (!driverName || !cabNumber || !driverNumber || !cabModel) {
       Toast.show({
         type: 'error',
@@ -36,7 +32,7 @@ const DriverAllocation = () => {
       });
       return;
     }
-
+  
     try {
       const response = await fetch(`${api}/booking/getbooking/${bookingId}`, {
         method: 'PUT',
@@ -50,27 +46,46 @@ const DriverAllocation = () => {
             contactNumber: driverNumber,
             cabNumber: cabNumber,
             carModel: cabModel,
-          }
+          },
         }),
       });
   
-      const res = await response.json();
-      console.log('Driver Allocation Response:', res); // Debug server response
+
+      console.log('Response Status:', response.status);
+      console.log('Response Headers:', response.headers.get('content-type'));
   
-      if (!res.success) {
+      const resText = await response.text(); 
+  
+      console.log('Raw Response Text:', resText); 
+  
+
+      if (response.headers.get('content-type')?.includes('application/json')) {
+        const res = JSON.parse(resText);
+        console.log('Parsed JSON Response:', res);
+  
+        if (!res.success) {
+          Toast.show({
+            type: 'error',
+            position: 'top',
+            text1: 'Error',
+            text2: 'Driver allocation failed. Please try again.',
+          });
+          return;
+        }
+  
+        console.log('Driver allocated:', driverName, cabNumber, cabModel);
+        navigation.navigate('Status' as never); 
+      } else {
+        console.error('Expected JSON but got something else:', resText);
         Toast.show({
           type: 'error',
           position: 'top',
-          text1: 'Error',
-          text2: 'Driver allocation failed. Please try again.',
+          text1: 'Server Error',
+          text2: 'Unexpected response from the server.',
         });
-        return;
       }
-  
-      console.log('Driver allocated:', driverName, cabNumber, cabModel); // Debug successful allocation
-      navigation.navigate('Status' as never); // Redirect to Driver Allotment Status
     } catch (error) {
-      console.error('Error during driver allocation:', error); // Debug network error
+      console.error('Error during driver allocation:', error);
       Toast.show({
         type: 'error',
         position: 'top',
@@ -81,13 +96,13 @@ const DriverAllocation = () => {
   };
 
   const handleCancelBooking = () => {
-    console.log('Booking cancelled'); // Debug booking cancel
-    navigation.navigate('AdminHome' as never); // Redirect to Driver Booking Details
+    console.log('Booking cancelled'); 
+    navigation.navigate('AdminHome' as never); 
   };
 
   const handleDriverNumberChange = (text: string) => {
-    console.log('Driver Number Input:', text); // Debug driver number input
-    // Allow only numeric characters
+    console.log('Driver Number Input:', text);
+
     if (/^\d*$/.test(text)) {
       setDriverNumber(text);
     } else {
@@ -101,7 +116,7 @@ const DriverAllocation = () => {
   };
 
   const goBack = () => {
-    console.log('Navigating Back'); // Debug navigation back
+    console.log('Navigating Back'); 
     navigation.goBack();
   };
 
@@ -120,7 +135,7 @@ const DriverAllocation = () => {
         placeholder="Enter the Driver Name"
         value={driverName}
         onChangeText={(text) => {
-          console.log('Driver Name Input:', text); // Debug driver name input
+          console.log('Driver Name Input:', text); 
           setDriverName(text);
         }}
       />
@@ -131,7 +146,7 @@ const DriverAllocation = () => {
         placeholder="Enter the Cab Number"
         value={cabNumber}
         onChangeText={(text) => {
-          console.log('Cab Number Input:', text); // Debug cab number input
+          console.log('Cab Number Input:', text); 
           setCabNumber(text);
         }}
       />
@@ -149,7 +164,7 @@ const DriverAllocation = () => {
       <TouchableOpacity
         className="border border-gray-300 rounded-lg p-4 pb-6 mb-6 text-base"
         onPress={() => {
-          console.log('Opening Cab Model Dropdown'); // Debug dropdown opening
+          console.log('Opening Cab Model Dropdown'); 
           setIsDropdownVisible(true);
         }}
       >
@@ -160,7 +175,7 @@ const DriverAllocation = () => {
         transparent={true}
         visible={isDropdownVisible}
         onRequestClose={() => {
-          console.log('Closing Cab Model Dropdown'); // Debug dropdown closing
+          console.log('Closing Cab Model Dropdown'); 
           setIsDropdownVisible(false);
         }}
       >
@@ -172,7 +187,7 @@ const DriverAllocation = () => {
                 key={model}
                 className="p-4 border-b border-gray-300"
                 onPress={() => {
-                  console.log('Cab Model Selected:', model); // Debug cab model selection
+                  console.log('Cab Model Selected:', model); 
                   setCabModel(model);
                   setIsDropdownVisible(false);
                 }}
@@ -181,7 +196,7 @@ const DriverAllocation = () => {
               </TouchableOpacity>
             ))}
             <Button title="Cancel" onPress={() => {
-              console.log('Cancel Dropdown'); // Debug cancel dropdown
+              console.log('Cancel Dropdown'); 
               setIsDropdownVisible(false);
             }} />
           </View>
