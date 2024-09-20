@@ -17,7 +17,7 @@ const api = process.env.EXPO_PUBLIC_API;
   const bookingId = route.params?.bookingId;
   console.log('Booking ID:', bookingId);
   const navigation = useNavigation();
-  const { width, height } = Dimensions.get('window'); // Get screen width and height dynamically
+  const { width, height } = Dimensions.get('window'); 
 
   const handleDriverAllocation = async() => {
     const token = await AsyncStorage.getItem('token');
@@ -57,17 +57,58 @@ const api = process.env.EXPO_PUBLIC_API;
       });
     }
 
-    console.log('Driver allocated:', driverName, cabNumber, cabModel);
-    navigation.navigate('Status' as never); // Redirect to Driver Allotment Status
+      console.log('Response Status:', response.status);
+      console.log('Response Headers:', response.headers.get('content-type'));
+  
+      const resText = await response.text(); 
+  
+      console.log('Raw Response Text:', resText); 
+  
+
+      if (response.headers.get('content-type')?.includes('application/json')) {
+        const res = JSON.parse(resText);
+        console.log('Parsed JSON Response:', res);
+  
+        if (!res.success) {
+          Toast.show({
+            type: 'error',
+            position: 'top',
+            text1: 'Error',
+            text2: 'Driver allocation failed. Please try again.',
+          });
+          return;
+        }
+  
+        console.log('Driver allocated:', driverName, cabNumber, cabModel);
+        navigation.navigate('Status' as never); 
+      } else {
+        console.error('Expected JSON but got something else:', resText);
+        Toast.show({
+          type: 'error',
+          position: 'top',
+          text1: 'Server Error',
+          text2: 'Unexpected response from the server.',
+        });
+      }
+    } catch (error) {
+      console.error('Error during driver allocation:', error);
+      Toast.show({
+        type: 'error',
+        position: 'top',
+        text1: 'Network Error',
+        text2: 'Failed to allocate driver. Please check your internet connection.',
+      });
+    }
   };
 
   const handleCancelBooking = () => {
-    console.log('Booking cancelled');
-    navigation.navigate('AdminHome' as never); // Redirect to Driver Booking Details
+    console.log('Booking cancelled'); 
+    navigation.navigate('AdminHome' as never); 
   };
 
   const handleDriverNumberChange = (text: string) => {
-    // Allow only numeric characters
+    console.log('Driver Number Input:', text);
+
     if (/^\d*$/.test(text)) {
       setDriverNumber(text);
     } else {
@@ -81,6 +122,7 @@ const api = process.env.EXPO_PUBLIC_API;
   };
 
   const goBack = () => {
+    console.log('Navigating Back'); 
     navigation.goBack();
   };
 
@@ -98,7 +140,10 @@ const api = process.env.EXPO_PUBLIC_API;
         className="border border-gray-300 rounded-lg p-4 mb-6 text-base"
         placeholder="Enter the Driver Name"
         value={driverName}
-        onChangeText={(text) => setDriverName(text)}
+        onChangeText={(text) => {
+          console.log('Driver Name Input:', text); 
+          setDriverName(text);
+        }}
       />
 
       <Text className="text-lg font-semibold mb-2">Cab Number</Text>
@@ -106,7 +151,10 @@ const api = process.env.EXPO_PUBLIC_API;
         className="border border-gray-300 rounded-lg p-4 mb-6 text-base"
         placeholder="Enter the Cab Number"
         value={cabNumber}
-        onChangeText={(text) => setCabNumber(text)}
+        onChangeText={(text) => {
+          console.log('Cab Number Input:', text); 
+          setCabNumber(text);
+        }}
       />
 
       <Text className="text-lg font-semibold mb-2">Driver's Contact No.</Text>
@@ -121,7 +169,10 @@ const api = process.env.EXPO_PUBLIC_API;
       <Text className="text-lg font-semibold mb-2">Cab Model</Text>
       <TouchableOpacity
         className="border border-gray-300 rounded-lg p-4 pb-6 mb-6 text-base"
-        onPress={() => setIsDropdownVisible(true)}
+        onPress={() => {
+          console.log('Opening Cab Model Dropdown'); 
+          setIsDropdownVisible(true);
+        }}
       >
         <Text>{cabModel}</Text>
       </TouchableOpacity>
@@ -129,7 +180,10 @@ const api = process.env.EXPO_PUBLIC_API;
       <Modal
         transparent={true}
         visible={isDropdownVisible}
-        onRequestClose={() => setIsDropdownVisible(false)}
+        onRequestClose={() => {
+          console.log('Closing Cab Model Dropdown'); 
+          setIsDropdownVisible(false);
+        }}
       >
         <View className="flex-1 justify-center items-center bg-black opacity-80">
           <View className="bg-white rounded-xl p-8">
@@ -139,6 +193,7 @@ const api = process.env.EXPO_PUBLIC_API;
                 key={model}
                 className="p-4 border-b border-gray-300"
                 onPress={() => {
+                  console.log('Cab Model Selected:', model); 
                   setCabModel(model);
                   setIsDropdownVisible(false);
                 }}
@@ -146,7 +201,10 @@ const api = process.env.EXPO_PUBLIC_API;
                 <Text className="text-base">{model}</Text>
               </TouchableOpacity>
             ))}
-            <Button title="Cancel" onPress={() => setIsDropdownVisible(false)} />
+            <Button title="Cancel" onPress={() => {
+              console.log('Cancel Dropdown'); 
+              setIsDropdownVisible(false);
+            }} />
           </View>
         </View>
       </Modal>
