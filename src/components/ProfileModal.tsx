@@ -8,21 +8,21 @@ import {
   ScrollView,
   Dimensions,
 } from 'react-native';
-import { FontAwesome } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
-import { useDispatch, useSelector } from 'react-redux';
+import { useSelector } from 'react-redux';
 
 interface ProfileModalProps {
-  profileImage?: string; // Pass profile image URL if provided
   modalVisible: boolean;
   toggleModal: () => void;
 }
 
-const ProfileModal: React.FC<ProfileModalProps> = ({ profileImage }) => {
+const ProfileModal: React.FC<ProfileModalProps> = () => {
   const navigation = useNavigation();
   const [modalVisible, setModalVisible] = useState(false);
 
-const data =useSelector((state:any) => state.jsonSlice?.data);
+  // Retrieve user data from Redux store
+  const { name, pic } = useSelector((state: any) => state.profileData.data); // Adjust state path if necessary
+
   const toggleModal = () => {
     setModalVisible(!modalVisible);
   };
@@ -39,7 +39,7 @@ const data =useSelector((state:any) => state.jsonSlice?.data);
       {/* Touchable Profile Image on the Right */}
       <TouchableOpacity onPress={toggleModal} className="flex-row justify-end items-center">
         <Image
-          source={profileImage ? { uri: profileImage } : require('../../assets/Images/profile_image.png')}
+          source={pic ? { uri: pic } : require('../../assets/Images/profile_image.png')}
           className="w-12 h-12 rounded-full"
         />
       </TouchableOpacity>
@@ -55,12 +55,8 @@ const data =useSelector((state:any) => state.jsonSlice?.data);
           <View className="bg-white rounded-lg p-5" style={{ width: screenWidth * 0.8 }}>
             <ScrollView>
               <View className="items-center mb-5">
-                <Text className="text-xl font-bold mb-1">Sonia</Text>
-                <View className="flex-row">
-                  <FontAwesome name="star" size={18} color="#FFD700" />
-                  <FontAwesome name="star" size={18} color="#FFD700" />
-                  <FontAwesome name="star" size={18} color="#FFD700" />
-                </View>
+                {/* Use the name from Redux store */}
+                <Text className="text-xl font-bold mb-1">{name || 'User'}</Text>
               </View>
 
               {/* Modal Options */}
