@@ -60,11 +60,11 @@ const SignUpScreen: React.FC<Props> = ({ navigation }) => {
   const validateForm = () => {
     const { username, phone, email, password, confirmpassword, otp1, otp2, otp3, otp4 } = formData;
     const requiredFields = { username, phone, email, password, confirmpassword, otp1, otp2, otp3, otp4 };
-
+  
     const emptyFields = Object.entries(requiredFields)
       .filter(([_, value]) => !value.trim())
       .map(([key]) => key);
-
+  
     if (emptyFields.length > 0) {
       Toast.show({
         type: 'error',
@@ -74,7 +74,7 @@ const SignUpScreen: React.FC<Props> = ({ navigation }) => {
       });
       return false;
     }
-
+  
     if (!isValidEmail(email)) {
       Toast.show({
         type: 'error',
@@ -84,7 +84,19 @@ const SignUpScreen: React.FC<Props> = ({ navigation }) => {
       });
       return false;
     }
+  
 
+    const passwordRegex = /^(?=.*[A-Za-z])(?=.*\d)(?=.*[@$!%*#?&])[A-Za-z\d@$!%*#?&]{8,}$/;
+    if (!passwordRegex.test(password)) {
+      Toast.show({
+        type: 'error',
+        position: 'top',
+        text1: 'Weak Password',
+        text2: 'Password must be at least 8 characters, include alphanumeric characters and 1 special character (e.g., @, #, $, %)',
+      });
+      return false;
+    }
+  
     if (password !== confirmpassword) {
       Toast.show({
         type: 'error',
@@ -94,9 +106,10 @@ const SignUpScreen: React.FC<Props> = ({ navigation }) => {
       });
       return false;
     }
-
+  
     return true;
   };
+  
 
   const handleSignUp = async () => {
     if (validateForm()) {
