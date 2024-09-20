@@ -7,16 +7,9 @@ import { LinearGradient } from 'expo-linear-gradient';
 import ProfileModal from '../components/ProfileModal';
 import { useNavigation } from '@react-navigation/native';
 
-// Define the type for booking data
-interface Driver {
-  name: string;
-  contactNumber: string;
-  cabNumber: string;
-  carModel: string;
-}
 
 interface Booking {
-  driver: Driver;
+
   _id: string;
   userId: string;
   username: string;
@@ -154,8 +147,6 @@ const TripDetailsScreen = () => {
               </View>
             </View>
 
-            <Text className="mt-4 text-base text-gray-600">Booking ID: {bookingData._id}</Text>
-            <Text className="mt-4 text-base text-gray-600">Driver: {bookingData.driver.name}</Text>
           </>
         )}
 
