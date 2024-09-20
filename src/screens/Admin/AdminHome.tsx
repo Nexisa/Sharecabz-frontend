@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { FlatList, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { FlatList, Text, TouchableOpacity, View, TextInput, Alert } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { useNavigation } from "@react-navigation/native";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -25,18 +25,17 @@ interface Booking {
 type RootStackParamList = {
   UserDetailPage: { bookingId: string };
   SignIn: undefined;
-  // Add other routes as needed
 };
 
-// Define the type for your navigation prop
 type AdminHomeNavigationProp = StackNavigationProp<RootStackParamList>;
 
 const AdminHome = () => {
   const [bookings, setBookings] = useState<Booking[]>([]);
   const [sortOrder, setSortOrder] = useState<"asc" | "desc">("asc");
+  const [searchQuery, setSearchQuery] = useState<string>('');
   const navigation = useNavigation<AdminHomeNavigationProp>();
   const dispatch = useDispatch();
-  const api = process.env.EXPO_PUBLIC_API;
+  const api = process.env.EXPO_PUBLIC_API || 'http://localhost:3000/api'; // Fallback URL
 
   useEffect(() => {
     fetchBookings();
@@ -55,9 +54,12 @@ const AdminHome = () => {
       const res = await response.json();
       if (res.success && res.bookings) {
         setBookings(res.bookings);
+      } else {
+        throw new Error(res.message || "Failed to fetch bookings");
       }
     } catch (error) {
       console.error("Error fetching bookings:", error);
+      Alert.alert("Error", "Could not fetch bookings. Please try again later.");
     }
   };
 
@@ -74,16 +76,19 @@ const AdminHome = () => {
     return 0;
   });
 
+  const filteredBookings = sortedBookings.filter((booking) =>
+    booking._id.includes(searchQuery) || booking.username.toLowerCase().includes(searchQuery.toLowerCase())
+  );
+
   const renderItem = ({ item }: { item: Booking }) => (
-    <TouchableOpacity onPress={() => handlePress(item._id)} style={styles.row}>
-      <Text style={styles.name}>{item.username || 'N/A'}</Text>
-      <Text style={styles.bookingId}>B{item._id.slice(-6)}</Text>
+    <TouchableOpacity onPress={() => handlePress(item._id)} className="flex-row justify-between items-center px-5 py-4 border-b border-gray-300">
+      <Text className="flex-1">{item.username || 'N/A'}</Text>
+      <Text className="flex-1 text-center">B{item._id.slice(-6)}</Text>
       <Ionicons name="eye-outline" size={24} color="#000" />
     </TouchableOpacity>
   );
 
   const handlePress = (bookingId: string) => {
-    // Navigate to booking details page
     navigation.navigate("UserDetailPage", { bookingId });
   };
 
@@ -95,106 +100,45 @@ const AdminHome = () => {
   };
 
   return (
-    <SafeAreaView style={styles.container}>
-      <View style={styles.header}>
-        <View style={styles.searchBar}>
+    <SafeAreaView className="flex-1 bg-white">
+      <View className="flex-row items-center p-2 border-b border-gray-300">
+        <View className="flex-1 flex-row items-center bg-gray-200 rounded-full mx-2 px-2 h-10">
           <Ionicons name="search" size={20} color="#999" />
-          <Text style={styles.searchText}>Search By booking Id...</Text>
+          <TextInput
+            value={searchQuery}
+            onChangeText={setSearchQuery}
+            placeholder="Search by booking ID or username..."
+            className="ml-2 text-black"
+          />
         </View>
         <TouchableOpacity onPress={openModal}>
           <Ionicons name="menu" size={24} color="#000" />
         </TouchableOpacity>
       </View>
 
-      <Text style={styles.title}>Booking Details</Text>
+      <Text className="text-2xl font-bold m-5">Booking Details</Text>
 
-      <View style={styles.listHeader}>
-        <TouchableOpacity onPress={toggleSortOrder} style={styles.sortButton}>
-          <Text style={styles.headerText}>Name</Text>
-          <Ionicons
-            name={sortOrder === "asc" ? "arrow-up" : "arrow-down"}
-            size={16}
-            color="#000"
-          />
+      <View className="flex-row justify-between px-5 py-2 border-b border-gray-300">
+        <TouchableOpacity onPress={toggleSortOrder} className="flex-row items-center">
+          <Text className="font-bold">Name</Text>
+          <Ionicons name={sortOrder === "asc" ? "arrow-up" : "arrow-down"} size={16} color="#000" />
         </TouchableOpacity>
-        <Text style={styles.headerTextLeft}>Booking ID</Text>
+        <Text className="font-bold mr-16">Booking ID</Text>
       </View>
 
-      <FlatList
-        data={sortedBookings}
-        renderItem={renderItem}
-        keyExtractor={(item) => item._id}
-      />
+      {filteredBookings.length === 0 ? (
+        <Text className="text-center mt-5 text-gray-500">No bookings available</Text>
+      ) : (
+        <FlatList
+          data={filteredBookings}
+          renderItem={renderItem}
+          keyExtractor={(item) => item._id}
+          initialNumToRender={10}
+          removeClippedSubviews={true}
+        />
+      )}
     </SafeAreaView>
   );
 };
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: "#fff",
-  },
-  header: {
-    flexDirection: "row",
-    alignItems: "center",
-    padding: 10,
-    borderBottomWidth: 1,
-    borderBottomColor: "#eee",
-  },
-  searchBar: {
-    flex: 1,
-    flexDirection: "row",
-    alignItems: "center",
-    backgroundColor: "#f0f0f0",
-    borderRadius: 20,
-    marginHorizontal: 10,
-    paddingHorizontal: 10,
-    height: 40,
-  },
-  searchText: {
-    marginLeft: 10,
-    color: "#000000",
-  },
-  title: {
-    fontSize: 24,
-    fontWeight: "bold",
-    margin: 20,
-  },
-  listHeader: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    paddingHorizontal: 20,
-    paddingVertical: 10,
-    borderBottomWidth: 1,
-    borderBottomColor: "#eee",
-  },
-  sortButton: {
-    flexDirection: "row",
-    alignItems: "center",
-  },
-  headerText: {
-    fontWeight: "bold",
-  },
-  headerTextLeft: {
-    fontWeight: "bold",
-    marginRight: 63,
-  },
-  row: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    paddingHorizontal: 20,
-    paddingVertical: 15,
-    borderBottomWidth: 1,
-    borderBottomColor: "#eee",
-  },
-  name: {
-    flex: 1,
-  },
-  bookingId: {
-    flex: 1,
-    textAlign: "center",
-  },
-});
 
 export default AdminHome;

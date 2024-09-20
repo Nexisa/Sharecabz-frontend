@@ -1,19 +1,30 @@
 import React, { useEffect, useState } from 'react';
 import { View, Text, StyleSheet, Image, TouchableOpacity, TextInput, ScrollView } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { useNavigation, useRoute } from '@react-navigation/native';
+import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { StackNavigationProp } from '@react-navigation/stack';
+import moment from 'moment'; // Use moment for date formatting
+
+// Define types for your stack
+type RootStackParamList = {
+  AdminHome: undefined;
+  DriverAllocation: { bookingId: string };
+  UserDetailPage: { bookingId: string }; // Include bookingId here
+};
+
+// Define types for navigation and route props
+type UserDetailPageNavigationProp = StackNavigationProp<RootStackParamList, 'UserDetailPage'>;
+type UserDetailPageRouteProp = RouteProp<RootStackParamList, 'UserDetailPage'>;
 
 const UserDetailPage = () => {
-  // Use 'any' for navigation and route to avoid type errors
-  const navigation = useNavigation<any>();
-  const route = useRoute<any>();
+  const navigation = useNavigation<UserDetailPageNavigationProp>();
+  const route = useRoute<UserDetailPageRouteProp>(); // Ensure the route type is used
+  
+  const bookingId = route.params.bookingId; // No need for optional chaining here since bookingId is defined in the route params
 
-  // Get bookingId from route parameters
-  const bookingId = route.params?.bookingId;
-
-  // State to store user details fetched from API
   const [userDetails, setUserDetails] = useState({
+    username: '', // Added username field
     email: '',
     phone: '',
     sourceLocation: '',
@@ -24,11 +35,9 @@ const UserDetailPage = () => {
     totalSeats: '',
     paymentStatus: '',
   });
+  
+  const api = process.env.EXPO_PUBLIC_API; // Use your actual environment variable
 
-  // Replace this with your actual API endpoint
-  const api = process.env.EXPO_PUBLIC_API;
-
-  // Function to fetch user details from API
   const fetchUserDetails = async () => {
     try {
       const token = await AsyncStorage.getItem('token');
@@ -52,16 +61,19 @@ const UserDetailPage = () => {
 
       const res = await response.json();
       const data = res.booking;
+
+      // Ensure you map the correct field names from your API response
       setUserDetails({
-        email: data.userId.email,
-        phone: data.userId.phone,
-        sourceLocation: data.sourceLocation,
-        destinationLocation: data.destinationLocation,
-        pickupLocation: data.pickupPoint,
-        date: data.startDate,
-        time: data.departureTime,
-        totalSeats: data.seats,
-        paymentStatus: data.paymentStatus,
+        username: data.userId.username || 'N/A', // Assuming 'username' exists on userId
+        email: data.userId.email || 'N/A',
+        phone: data.userId.phone || 'N/A', // Ensure phone exists on userId
+        sourceLocation: data.sourceLocation || 'N/A',
+        destinationLocation: data.destinationLocation || 'N/A',
+        pickupLocation: data.pickupPoint || 'N/A',
+        date: moment(data.startDate).format('YYYY-MM-DD'), // Format date
+        time: moment(data.departureTime, 'HH:mm').format('hh:mm A'), // Format time
+        totalSeats: data.seats.toString() || 'N/A', // Convert seats to string
+        paymentStatus: data.paymentStatus || 'N/A',
       });
     } catch (error) {
       console.log('Error fetching user details:', error);
@@ -69,7 +81,6 @@ const UserDetailPage = () => {
   };
 
   useEffect(() => {
-    // Fetch user details on component mount
     if (bookingId) {
       fetchUserDetails();
     }
@@ -78,138 +89,61 @@ const UserDetailPage = () => {
   const handleBackPress = () => {
     navigation.goBack();
   };
-
   return (
-    <ScrollView contentContainerStyle={styles.container}>
-      <View className="absolute top-1 left-0 right-0 flex-row px-2">
-        <TouchableOpacity onPress={handleBackPress} className="p-2 mt-14">
+    <ScrollView className="flex-1 bg-gray-100">
+      <View className="flex-row items-center p-6">
+        <TouchableOpacity onPress={handleBackPress}>
           <Ionicons name="arrow-back" size={24} color="black" />
         </TouchableOpacity>
-        <Text className="p-2 mt-14">User Booking Details</Text>
+        <Text className="ml-5 text-lg mt-10">User Booking Details</Text>
       </View>
 
-      <View style={styles.userDetail}>
+      <View className="items-center mt-24 mb-5">
         <Image
-          style={styles.avatar}
+          className="w-20 h-20 rounded-full mb-3"
           source={require('../../../assets/Images/profile_image.png')}
         />
-        <Text style={styles.name}>{userDetails.email || 'N/A'}</Text>
-        <Text style={styles.username}>{userDetails.email}</Text>
+        <Text className="text-xl font-bold text-gray-800">{userDetails.username || 'N/A'}</Text>
+        <Text className="text-sm text-gray-600">{userDetails.email}</Text>
       </View>
 
-      {/* User Booking Details */}
-      <View style={styles.detailsContainer}>
-        <Text style={styles.title}>Email</Text>
-        <TextInput style={styles.input} value={userDetails.email} editable={false} />
+      <View className="px-4 mb-5">
+        <Text className="font-bold py-1">Email</Text>
+        <TextInput className="border border-gray-300 rounded-lg p-3 mb-4 bg-gray-100 text-gray-700" value={userDetails.email} editable={false} />
 
-        <Text style={styles.title}>Phone</Text>
-        <TextInput style={styles.input} value={userDetails.phone} editable={false} />
+        <Text className="font-bold py-1">Phone</Text>
+        <TextInput className="border border-gray-300 rounded-lg p-3 mb-4 bg-gray-100 text-gray-700" value={userDetails.phone} editable={false} />
 
-        <Text style={styles.title}>Source Location</Text>
-        <TextInput style={styles.input} value={userDetails.sourceLocation} editable={false} />
+        <Text className="font-bold py-1">Source Location</Text>
+        <TextInput className="border border-gray-300 rounded-lg p-3 mb-4 bg-gray-100 text-gray-700" value={userDetails.sourceLocation} editable={false} />
 
-        <Text style={styles.title}>Destination Location</Text>
-        <TextInput style={styles.input} value={userDetails.destinationLocation} editable={false} />
+        <Text className="font-bold py-1">Destination Location</Text>
+        <TextInput className="border border-gray-300 rounded-lg p-3 mb-4 bg-gray-100 text-gray-700" value={userDetails.destinationLocation} editable={false} />
 
-        <Text style={styles.title}>Pickup Location</Text>
-        <TextInput style={styles.input} value={userDetails.pickupLocation} editable={false} />
+        <Text className="font-bold py-1">Pickup Location</Text>
+        <TextInput className="border border-gray-300 rounded-lg p-3 mb-4 bg-gray-100 text-gray-700" value={userDetails.pickupLocation} editable={false} />
 
-        <Text style={styles.title}>Date</Text>
-        <TextInput style={styles.input} value={userDetails.date} editable={false} />
+        <Text className="font-bold py-1">Date</Text>
+        <TextInput className="border border-gray-300 rounded-lg p-3 mb-4 bg-gray-100 text-gray-700" value={userDetails.date} editable={false} />
 
-        <Text style={styles.title}>Time</Text>
-        <TextInput style={styles.input} value={userDetails.time} editable={false} />
+        <Text className="font-bold py-1">Time</Text>
+        <TextInput className="border border-gray-300 rounded-lg p-3 mb-4 bg-gray-100 text-gray-700" value={userDetails.time} editable={false} />
 
-        <Text style={styles.title}>Total Seats</Text>
-        <TextInput style={styles.input} value={userDetails.totalSeats} editable={false} />
+        <Text className="font-bold py-1">Total Seats</Text>
+        <TextInput className="border border-gray-300 rounded-lg p-3 mb-4 bg-gray-100 text-gray-700" value={userDetails.totalSeats} editable={false} />
       </View>
 
-      {/* Buttons */}
-      <View style={styles.buttonContainer}>
-        <TouchableOpacity onPress={() => navigation.navigate('AdminHome')} style={styles.cancelButton}>
-          <Text style={styles.cancelButtonText}>Cancel</Text>
+      <View className="flex-row justify-between px-4 mb-6">
+        <TouchableOpacity onPress={() => navigation.navigate('AdminHome')} className="bg-red-500 py-4 px-6 rounded-lg flex-1 mr-2 items-center">
+          <Text className="text-white font-bold text-base">Cancel</Text>
         </TouchableOpacity>
 
-        <TouchableOpacity onPress={() => navigation.navigate('DriverAllocation', { bookingId })} style={styles.nextButton}>
-          <Text style={styles.nextButtonText}>Next Page</Text>
+        <TouchableOpacity onPress={() => navigation.navigate('DriverAllocation', { bookingId })} className="bg-green-500 py-4 px-6 rounded-lg flex-1 ml-2 items-center">
+          <Text className="text-white font-bold text-base">Next Page</Text>
         </TouchableOpacity>
       </View>
     </ScrollView>
   );
 };
-
-const styles = StyleSheet.create({
-  container: {
-    flexGrow: 1,
-    padding: 20,
-    backgroundColor: '#f9f9f9',
-  },
-  userDetail: {
-    alignItems: 'center',
-    marginTop: 100,
-    marginBottom: 20,
-  },
-  avatar: {
-    width: 80,
-    height: 80,
-    borderRadius: 40,
-    marginBottom: 10,
-  },
-  name: {
-    fontSize: 20,
-    fontWeight: 'bold',
-    color: '#333',
-  },
-  username: {
-    fontSize: 14,
-    color: '#888',
-  },
-  detailsContainer: {
-    marginBottom: 20,
-  },
-  title: {
-    fontWeight: 'bold',
-    padding: 5,
-  },
-  input: {
-    borderWidth: 1,
-    borderColor: '#ddd',
-    borderRadius: 8,
-    padding: 10,
-    marginBottom: 15,
-    backgroundColor: '#f0f0f0',
-    color: '#333',
-  },
-  buttonContainer: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-  },
-  cancelButton: {
-    backgroundColor: '#dc3545', // Red for cancel
-    padding: 15,
-    borderRadius: 8,
-    flex: 1,
-    marginRight: 10,
-    alignItems: 'center',
-  },
-  cancelButtonText: {
-    color: '#fff',
-    fontSize: 16,
-    fontWeight: 'bold',
-  },
-  nextButton: {
-    backgroundColor: '#28a745', // Green for next page
-    padding: 15,
-    borderRadius: 8,
-    flex: 1,
-    marginLeft: 10,
-    alignItems: 'center',
-  },
-  nextButtonText: {
-    color: '#fff',
-    fontSize: 16,
-    fontWeight: 'bold',
-  },
-});
 
 export default UserDetailPage;

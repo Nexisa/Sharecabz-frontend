@@ -54,8 +54,9 @@ const TripDetailsScreen = () => {
         },
       });
       const result = await response.json();
+      console.log(result); 
       if (result.success) {
-        setBookingData(result.bookings[0]); // Assuming you want to show the first booking
+        setBookingData(result.bookings[0]);
       } else {
         setError('Failed to fetch booking data.');
       }
@@ -65,6 +66,7 @@ const TripDetailsScreen = () => {
       setLoading(false);
     }
   };
+  
 
   useEffect(() => {
     fetchBookingData();
@@ -132,8 +134,8 @@ const TripDetailsScreen = () => {
               </View>
               <View className="items-center w-2/5">
                 <Text className="text-lg font-bold">Time</Text>
-                <Text className="text-base mt-2">{bookingData.departureTime}</Text>
-              </View>
+                <Text className="text-base mt-2">{bookingData.departureTime || "Time not available"}</Text>
+                </View>
             </View>
 
             <View className="flex-row justify-between w-full my-3">
