@@ -1,11 +1,10 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import {
   View,
   Text,
   Image,
   TouchableOpacity,
   TextInput,
-  Alert,
   ScrollView,
   Dimensions,
   Alert
@@ -19,15 +18,20 @@ import { logout } from '../utils/Slice';
 import { updateProfile } from '../utils/ProfileSlice';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 <<<<<<< HEAD
+<<<<<<< HEAD
 =======
 import Toast from 'react-native-toast-message';
 
 >>>>>>> c5acdc6 (new)
+=======
+import Toast from 'react-native-toast-message';
+
+>>>>>>> a3d94b4549e49f3e2a8f85435b2ddd626a88f554
 const { width } = Dimensions.get('window');
 
-// Define the navigation prop type
 type RootStackParamList = {
   ProfileScreen: undefined;
+  SignIn: undefined;
 };
 
 type ProfileScreenNavigationProp = StackNavigationProp<RootStackParamList, 'ProfileScreen'>;
@@ -37,20 +41,26 @@ interface Props {
 }
 
 const ProfileScreen: React.FC<Props> = ({ navigation }) => {
-  const [profileImage, setProfileImage] = useState(require('../../assets/Images/profile_image.png'));
+  const [profileImage, setProfileImage] = useState<{ uri: string } | null>(null);
   const [isChanged, setIsChanged] = useState(false);
+<<<<<<< HEAD
 <<<<<<< HEAD
   
   const data=useSelector((state:any) => state.profileData?.data);
   
   
 =======
+=======
+>>>>>>> a3d94b4549e49f3e2a8f85435b2ddd626a88f554
   const [isLoading, setIsLoading] = useState(false);
 
   const dispatch = useDispatch();
   const profileData = useSelector((state: any) => state.profileData.data); // Accessing profile data from Redux
 
+<<<<<<< HEAD
 >>>>>>> c5acdc6 (new)
+=======
+>>>>>>> a3d94b4549e49f3e2a8f85435b2ddd626a88f554
   const [userData, setUserData] = useState({
     name: profileData.name || 'Sonia',
     phoneNumber: profileData.phone || '+91 XXXXXXXXXX',
@@ -58,6 +68,7 @@ const ProfileScreen: React.FC<Props> = ({ navigation }) => {
     password: '**********',
     feedback: '',
   });
+<<<<<<< HEAD
 <<<<<<< HEAD
   const loaddata = async () => {
     await AsyncStorage.getItem('user').then((user) => {
@@ -72,6 +83,9 @@ const dispatch = useDispatch();
 =======
 
 >>>>>>> c5acdc6 (new)
+=======
+
+>>>>>>> a3d94b4549e49f3e2a8f85435b2ddd626a88f554
   const inputRefs = {
     name: useRef<TextInput>(null),
     phoneNumber: useRef<TextInput>(null),
@@ -89,7 +103,10 @@ const dispatch = useDispatch();
   });
 
 <<<<<<< HEAD
+<<<<<<< HEAD
 =======
+=======
+>>>>>>> a3d94b4549e49f3e2a8f85435b2ddd626a88f554
   useEffect(() => {
     loaddata();
   }, []);
@@ -121,12 +138,17 @@ const dispatch = useDispatch();
     }
   };
 
+<<<<<<< HEAD
 >>>>>>> c5acdc6 (new)
+=======
+>>>>>>> a3d94b4549e49f3e2a8f85435b2ddd626a88f554
   const handleBackPress = () => {
+    console.log('Back button pressed');
     navigation.goBack();
   };
 
   const handleSignOut = () => {
+<<<<<<< HEAD
 <<<<<<< HEAD
     Alert.alert('Sign Out', 'Are you sure you want to sign out?', [
       { text: 'Cancel', style: 'cancel' },
@@ -138,16 +160,53 @@ const dispatch = useDispatch();
         dispatch(logout()),
         navigation.navigate('SignIn' as never) }}
     ]);
+=======
+    Alert.alert(
+      'Sign Out',
+      'Are you sure you want to sign out?',
+      [
+        {
+          text: 'Cancel',
+          style: 'cancel',
+        },
+        {
+          text: 'Sign Out',
+          onPress: async () => {
+            try {
+              await AsyncStorage.removeItem('user');
+              await AsyncStorage.removeItem('token');
+              dispatch(logout());
+              navigation.navigate('SignIn');
+              Toast.show({
+                type: 'success',
+                text1: 'Success',
+                text2: 'You have been signed out',
+              });
+            } catch (error) {
+              console.error('Error during sign out:', error);
+              Toast.show({
+                type: 'error',
+                text1: 'Error',
+                text2: 'Failed to sign out',
+              });
+            }
+          },
+        },
+      ]
+    );
+>>>>>>> a3d94b4549e49f3e2a8f85435b2ddd626a88f554
   };
 
   const handleChangeProfileImage = async () => {
-    let result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ImagePicker.MediaTypeOptions.Images,
-      allowsEditing: true,
-      aspect: [1, 1],
-      quality: 1,
-    });
+    try {
+      let result = await ImagePicker.launchImageLibraryAsync({
+        mediaTypes: ImagePicker.MediaTypeOptions.Images,
+        allowsEditing: true,
+        aspect: [1, 1],
+        quality: 1,
+      });
 
+<<<<<<< HEAD
     if (!result.canceled) {
       setProfileImage({ uri: result.assets[0].uri });
       setIsChanged(true);
@@ -196,6 +255,8 @@ const dispatch = useDispatch();
         quality: 1,
       });
 
+=======
+>>>>>>> a3d94b4549e49f3e2a8f85435b2ddd626a88f554
       if (!result.canceled && result.assets && result.assets.length > 0) {
         const selectedAsset = result.assets[0];
         if (selectedAsset.uri) {
@@ -217,13 +278,19 @@ const dispatch = useDispatch();
         text1: 'Error',
         text2: 'Failed to update profile image',
       });
+<<<<<<< HEAD
 >>>>>>> c5acdc6 (new)
+=======
+>>>>>>> a3d94b4549e49f3e2a8f85435b2ddd626a88f554
     }
   };
 
   const handleEdit = (field: keyof typeof userData, value: string) => {
 <<<<<<< HEAD
+<<<<<<< HEAD
 =======
+=======
+>>>>>>> a3d94b4549e49f3e2a8f85435b2ddd626a88f554
     if (field === 'name') {
       const nameValid = /^[a-zA-Z\s]+$/.test(value);
       if (!nameValid) {
@@ -238,11 +305,19 @@ const dispatch = useDispatch();
       }
     }
 
+<<<<<<< HEAD
 >>>>>>> c5acdc6 (new)
+=======
+>>>>>>> a3d94b4549e49f3e2a8f85435b2ddd626a88f554
     if (field === 'phoneNumber') {
       const phoneNumberValid = /^\d{10}$/.test(value);
       if (!phoneNumberValid) {
         setErrors((prev) => ({ ...prev, phoneNumber: 'Phone number must be exactly 10 digits' }));
+        Toast.show({
+          type: 'error',
+          text1: 'Invalid Phone Number',
+          text2: 'Phone number must contain exactly 10 numeric digits',
+        });
       } else {
         setErrors((prev) => ({ ...prev, phoneNumber: '' }));
       }
@@ -252,6 +327,11 @@ const dispatch = useDispatch();
       const emailValid = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value);
       if (!emailValid) {
         setErrors((prev) => ({ ...prev, email: 'Please enter a valid email address' }));
+        Toast.show({
+          type: 'error',
+          text1: 'Invalid Email',
+          text2: 'Please enter a valid email address',
+        });
       } else {
         setErrors((prev) => ({ ...prev, email: '' }));
       }
@@ -263,6 +343,7 @@ const dispatch = useDispatch();
     setIsChanged(true);
   };
 
+<<<<<<< HEAD
 <<<<<<< HEAD
 
   const handleConfirmChanges = () => {
@@ -285,6 +366,16 @@ const dispatch = useDispatch();
         throw new Error('No authentication token found');
       }
 
+=======
+  const handleConfirmChanges = async () => {
+    setIsLoading(true);
+    try {
+      const token = await AsyncStorage.getItem('token');
+      if (!token) {
+        throw new Error('No authentication token found');
+      }
+
+>>>>>>> a3d94b4549e49f3e2a8f85435b2ddd626a88f554
       const apiUrl = `${process.env.EXPO_PUBLIC_API}/user/update`;
       const formData = new FormData();
       formData.append('username', userData.name);
@@ -339,16 +430,26 @@ const dispatch = useDispatch();
     } finally {
       setIsLoading(false);
     }
+<<<<<<< HEAD
 >>>>>>> c5acdc6 (new)
+=======
+>>>>>>> a3d94b4549e49f3e2a8f85435b2ddd626a88f554
   };
 
   const openKeyboard = (field: keyof typeof inputRefs) => {
     inputRefs[field].current?.focus();
   };
 
+  const getImageSource = () => {
+    if (profileImage && profileImage.uri) {
+      return { uri: profileImage.uri };
+    }
+    return require('../../assets/Images/profile_image.png');
+  };
 
   return (
     <SafeAreaView className='p-4'>
+<<<<<<< HEAD
 <<<<<<< HEAD
     <ScrollView contentContainerStyle={{ flexGrow: 1 }} >
       {/* Header with Back Button and Logo */}
@@ -384,6 +485,20 @@ const dispatch = useDispatch();
           />
         </View>
 
+=======
+      <ScrollView contentContainerStyle={{ flexGrow: 1 }}>
+        <View className="flex-row justify-between items-center mb-5">
+          <TouchableOpacity onPress={handleBackPress} className="p-2">
+            <Ionicons name="arrow-back" size={24} color="black" />
+          </TouchableOpacity>
+          <Image
+            source={require('../../assets/Images/try.png')}
+            className="w-28 h-28 self-end"
+            resizeMode="contain"
+          />
+        </View>
+
+>>>>>>> a3d94b4549e49f3e2a8f85435b2ddd626a88f554
         <View className="items-center mb-8">
           <View className="relative">
             <TouchableOpacity onPress={handleChangeProfileImage} className="flex items-center">
@@ -395,10 +510,58 @@ const dispatch = useDispatch();
               <TouchableOpacity onPress={handleChangeProfileImage} className="absolute bottom-0 right-0 bg-white p-2 rounded-lg shadow">
                 <FontAwesome name="pencil" size={16} color="black" />
               </TouchableOpacity>
+<<<<<<< HEAD
 >>>>>>> c5acdc6 (new)
+=======
+>>>>>>> a3d94b4549e49f3e2a8f85435b2ddd626a88f554
             </TouchableOpacity>
+          </View>
+          <Text className="text-xl font-bold mt-3">{userData.name}</Text>
+          <Text className="text-gray-500">{userData.phoneNumber}</Text>
+        </View>
+
+        <View className="w-full bg-gray-100 rounded-lg p-5 mb-8">
+          {(['name', 'phoneNumber', 'email', 'password', 'feedback'] as Array<keyof typeof userData>).map((field, index) => (
+            <View className="mb-4" key={index}>
+              <Text className="font-bold mb-1">
+                {field.charAt(0).toUpperCase() + field.slice(1)}
+              </Text>
+              <View className="flex-row items-center border-b border-gray-300">
+                <TextInput
+                  ref={inputRefs[field]}
+                  className={`flex-1 text-lg p-2 ${errors[field] ? 'border-b border-red-500' : ''}`}
+                  value={userData[field]}
+                  onChangeText={(text) => handleEdit(field, text)}
+                  placeholder={`Enter your ${field}`}
+                  secureTextEntry={field === 'password'}
+                />
+                <TouchableOpacity onPress={() => openKeyboard(field)} className="ml-2">
+                  <FontAwesome name="pencil" size={18} color="gray" />
+                </TouchableOpacity>
+              </View>
+              {errors[field] ? (
+                <Text className="text-red-500 text-xs mt-1">{errors[field]}</Text>
+              ) : null}
+            </View>
+          ))}
+        </View>
+
+        <View className="flex-row justify-between w-full px-6">
+          <TouchableOpacity
+            className={`w-2/5 p-4 rounded-xl ${isChanged ? 'bg-green-500' : 'bg-gray-300'} mr-8`}
+            onPress={handleConfirmChanges}
+            disabled={!isChanged || isLoading}
+          >
+            <Text className={`text-center text-lg font-bold ${isChanged ? 'text-white' : 'text-gray-500'}`}>
+              {isLoading ? 'Updating...' : 'Done'}
+            </Text>
+          </TouchableOpacity>
+          <TouchableOpacity onPress={handleSignOut} className="flex-row w-2/5 items-center p-4 bg-white rounded-xl border border-red-500">
+            <Ionicons name="log-out-outline" size={24} color="red" />
+            <Text className="ml-2 text-red-500 text-lg">Sign Out</Text>
           </TouchableOpacity>
         </View>
+<<<<<<< HEAD
         <Text className="text-xl font-bold mt-3">{userData.name}</Text>
         <Text className="text-gray-500">{userData.phoneNumber}</Text>
       </View>
@@ -490,6 +653,9 @@ const dispatch = useDispatch();
         </TouchableOpacity>
       </View>
     </ScrollView>
+=======
+      </ScrollView>
+>>>>>>> a3d94b4549e49f3e2a8f85435b2ddd626a88f554
     </SafeAreaView>
   );
 };
