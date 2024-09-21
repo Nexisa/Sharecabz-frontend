@@ -9,7 +9,12 @@
       "distribution": "internal"
     },
     "preview": {
-      "distribution": "internal"
+      "distribution": "internal",
+      "env": {
+        "EXPO_PUBLIC_API": "https://sharecabz-backend.onrender.com/api"
+        
+      },
+      "workflow": "managed"
     },
     "production": {}
   },
