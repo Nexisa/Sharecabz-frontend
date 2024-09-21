@@ -104,7 +104,7 @@ const LuxuryRideBooking = () => {
           marginTop: 16, 
           width: width * 0.8,   
           alignSelf: 'center',
-          height: width * 0.65,  
+          height: width * 0.7,  
           maxWidth: width,
         }}>
           <CalendarPicker

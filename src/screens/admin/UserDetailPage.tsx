@@ -1,63 +1,48 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, Image, TouchableOpacity, TextInput, ScrollView } from 'react-native';
+import { View, Text, Image, TouchableOpacity, TextInput, ScrollView, SafeAreaView } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { StackNavigationProp } from '@react-navigation/stack';
 
-// Define types for your stack
 type RootStackParamList = {
   AdminHome: undefined;
   DriverAllocation: { bookingId: string };
-  UserDetailPage: { bookingId: string }; // Include bookingId here
+  UserDetailPage: { bookingId: string }; 
 };
 
-// Define types for navigation and route props
 type UserDetailPageNavigationProp = StackNavigationProp<RootStackParamList, 'UserDetailPage'>;
 type UserDetailPageRouteProp = RouteProp<RootStackParamList, 'UserDetailPage'>;
 
 const UserDetailPage = () => {
   const navigation = useNavigation<UserDetailPageNavigationProp>();
-  const route = useRoute<UserDetailPageRouteProp>(); // Ensure the route type is used
+  const route = useRoute<UserDetailPageRouteProp>();
   
-  const bookingId = route.params.bookingId; // No need for optional chaining here since bookingId is defined in the route params
+  const bookingId = route.params.bookingId;
 
   const [userDetails, setUserDetails] = useState({
-    username: '', // Added username field
+    username: '',
     email: '',
     phone: '',
     sourceLocation: '',
     destinationLocation: '',
     pickupLocation: '',
     date: '',
-    time: '',
+    departureTime: '',
     totalSeats: '',
     paymentStatus: '',
   });
   
-  const api = process.env.EXPO_PUBLIC_API; // Use your actual environment variable
+  const api = process.env.EXPO_PUBLIC_API;
 
-  // Utility function to format date
   const formatDate = (dateString: string) => {
+    if (!dateString) return 'N/A';
     const date = new Date(dateString);
     return new Intl.DateTimeFormat('en-GB', {
       year: 'numeric',
       month: '2-digit',
       day: '2-digit',
-    }).format(date); // Formats the date as 'DD/MM/YYYY'
-  };
-
-  // Utility function to format time
-  const formatTime = (timeString: string) => {
-    const [hours, minutes] = timeString.split(':');
-    const date = new Date();
-    date.setHours(Number(hours), Number(minutes));
-
-    return date.toLocaleTimeString([], {
-      hour: '2-digit',
-      minute: '2-digit',
-      hour12: true,
-    }); // Formats time as 'hh:mm AM/PM'
+    }).format(date); 
   };
 
   const fetchUserDetails = async () => {
@@ -84,17 +69,16 @@ const UserDetailPage = () => {
       const res = await response.json();
       const data = res.booking;
 
-      // Ensure you map the correct field names from your API response
       setUserDetails({
-        username: data.username || 'N/A', // Assuming 'username' exists on userId
-        email: data.userId.email || 'N/A',
-        phone: data.userId.phone || 'N/A', // Ensure phone exists on userId
+        username: data.username || 'N/A',
+        email: data.userId?.email || 'N/A',
+        phone: data.userId?.phone || 'N/A',
         sourceLocation: data.sourceLocation || 'N/A',
         destinationLocation: data.destinationLocation || 'N/A',
         pickupLocation: data.pickupPoint || 'N/A',
-        date: formatDate(data.startDate), // Format date using the custom function
-        time: formatTime(data.departureTime), // Format time using the custom function
-        totalSeats: data.seats.toString() || 'N/A', // Convert seats to string
+        date: formatDate(data.startDate),
+        departureTime: data.departureTime,
+        totalSeats: data.seats ? data.seats.toString() : 'N/A',
         paymentStatus: data.paymentStatus || 'N/A',
       });
     } catch (error) {
@@ -111,60 +95,65 @@ const UserDetailPage = () => {
   const handleBackPress = () => {
     navigation.goBack();
   };
+
+  const renderDetailItem = (label: string, value: string) => (
+    <View className="mb-4">
+      <Text className="text-sm font-bold text-gray-600 mb-1">{label}</Text>
+      <TextInput 
+        className="border border-gray-300 rounded-lg p-3 bg-gray-50 text-gray-700" 
+        value={value} 
+        editable={false} 
+      />
+    </View>
+  );
+
   return (
-    <ScrollView className="flex-1 bg-gray-100">
-      <View className="flex-row items-center p-6">
-        <TouchableOpacity onPress={handleBackPress}>
-          <Ionicons name="arrow-back" size={24} color="black" />
-        </TouchableOpacity>
-        <Text className="ml-5 text-lg mt-10">User Booking Details</Text>
-      </View>
+    <SafeAreaView className="flex-1 bg-gray-100">
+      <ScrollView className="flex-1">
+        <View className="flex-row items-center p-4 border-b border-gray-200 bg-white mt-6">
+          <TouchableOpacity onPress={handleBackPress} className="p-2">
+            <Ionicons name="arrow-back" size={24} color="#333" />
+          </TouchableOpacity>
+          <Text className="text-lg font-bold ml-4">User Booking Details</Text>
+        </View>
 
-      <View className="items-center mt-24 mb-5">
-        <Image
-          className="w-20 h-20 rounded-full mb-3"
-          source={require('../../../assets/Images/profile_image.png')}
-        />
-        <Text className="text-xl font-bold text-gray-800">{userDetails.username || 'N/A'}</Text>
-        <Text className="text-sm text-gray-600">{userDetails.email}</Text>
-      </View>
+        <View className="items-center py-6 bg-white mb-4">
+          <Image
+            className="w-24 h-24 rounded-full mb-3"
+            source={require('../../../assets/Images/profile_image.png')}
+          />
+          <Text className="text-xl font-bold text-gray-800">{userDetails.username || 'N/A'}</Text>
+          <Text className="text-sm text-gray-600">{userDetails.email}</Text>
+        </View>
 
-      <View className="px-4 mb-5">
-        <Text className="font-bold py-1">Email</Text>
-        <TextInput className="border border-gray-300 rounded-lg p-3 mb-4 bg-gray-100 text-gray-700" value={userDetails.email} editable={false} />
+        <View className="bg-white rounded-lg mx-4 p-4 mb-6">
+          {renderDetailItem('Email', userDetails.email)}
+          {renderDetailItem('Phone', userDetails.phone)}
+          {renderDetailItem('Source Location', userDetails.sourceLocation)}
+          {renderDetailItem('Destination Location', userDetails.destinationLocation)}
+          {renderDetailItem('Pickup Location', userDetails.pickupLocation)}
+          {renderDetailItem('Date', userDetails.date)}
+          {renderDetailItem('Time', userDetails.departureTime)}
+          {renderDetailItem('Total Seats', userDetails.totalSeats)}
+        </View>
 
-        <Text className="font-bold py-1">Phone</Text>
-        <TextInput className="border border-gray-300 rounded-lg p-3 mb-4 bg-gray-100 text-gray-700" value={userDetails.phone} editable={false} />
+        <View className="flex-row justify-between px-4 mb-6">
+          <TouchableOpacity 
+            onPress={() => navigation.navigate('AdminHome')} 
+            className="bg-red-500 py-4 px-6 rounded-lg flex-1 mr-2 items-center"
+          >
+            <Text className="text-white font-bold text-base">Cancel</Text>
+          </TouchableOpacity>
 
-        <Text className="font-bold py-1">Source Location</Text>
-        <TextInput className="border border-gray-300 rounded-lg p-3 mb-4 bg-gray-100 text-gray-700" value={userDetails.sourceLocation} editable={false} />
-
-        <Text className="font-bold py-1">Destination Location</Text>
-        <TextInput className="border border-gray-300 rounded-lg p-3 mb-4 bg-gray-100 text-gray-700" value={userDetails.destinationLocation} editable={false} />
-
-        <Text className="font-bold py-1">Pickup Location</Text>
-        <TextInput className="border border-gray-300 rounded-lg p-3 mb-4 bg-gray-100 text-gray-700" value={userDetails.pickupLocation} editable={false} />
-
-        <Text className="font-bold py-1">Date</Text>
-        <TextInput className="border border-gray-300 rounded-lg p-3 mb-4 bg-gray-100 text-gray-700" value={userDetails.date} editable={false} />
-
-        <Text className="font-bold py-1">Time</Text>
-        <TextInput className="border border-gray-300 rounded-lg p-3 mb-4 bg-gray-100 text-gray-700" value={userDetails.time} editable={false} />
-
-        <Text className="font-bold py-1">Total Seats</Text>
-        <TextInput className="border border-gray-300 rounded-lg p-3 mb-4 bg-gray-100 text-gray-700" value={userDetails.totalSeats} editable={false} />
-      </View>
-
-      <View className="flex-row justify-between px-4 mb-6">
-        <TouchableOpacity onPress={() => navigation.navigate('AdminHome')} className="bg-red-500 py-4 px-6 rounded-lg flex-1 mr-2 items-center">
-          <Text className="text-white font-bold text-base">Cancel</Text>
-        </TouchableOpacity>
-
-        <TouchableOpacity onPress={() => navigation.navigate('DriverAllocation', { bookingId })} className="bg-green-500 py-4 px-6 rounded-lg flex-1 ml-2 items-center">
-          <Text className="text-white font-bold text-base">Next Page</Text>
-        </TouchableOpacity>
-      </View>
-    </ScrollView>
+          <TouchableOpacity 
+            onPress={() => navigation.navigate('DriverAllocation', { bookingId })} 
+            className="bg-green-500 py-4 px-6 rounded-lg flex-1 ml-2 items-center"
+          >
+            <Text className="text-white font-bold text-base">Next Page</Text>
+          </TouchableOpacity>
+        </View>
+      </ScrollView>
+    </SafeAreaView>
   );
 };
 

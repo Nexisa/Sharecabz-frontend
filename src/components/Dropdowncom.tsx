@@ -43,7 +43,7 @@ const Dropdowncom = ({ label, iconname, color, data, focusColor = '#81D742', onS
         <View style={styles.buttonContent}>
           <Icon
             name={iconname}
-            size={24} // Increased icon size
+            size={24} 
             color={color || 'black'}
             style={styles.icon}
           />
@@ -53,7 +53,7 @@ const Dropdowncom = ({ label, iconname, color, data, focusColor = '#81D742', onS
         </View>
         <AntDesign
           name={isOpen ? "up" : "down"}
-          size={24} // Increased arrow size
+          size={24} 
           color={'black'}
         />
       </TouchableOpacity>

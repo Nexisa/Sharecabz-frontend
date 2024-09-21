@@ -18,6 +18,7 @@ const DriverAllocation = () => {
   const [cabModel, setCabModel] = useState('Innova Crysta');
   const [isDropdownVisible, setIsDropdownVisible] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [isCancelling, setIsCancelling] = useState(false);
   const api = process.env.EXPO_PUBLIC_API;
 
   const route = useRoute<DriverAllocationScreenRouteProp>();
@@ -35,11 +36,26 @@ const DriverAllocation = () => {
       });
       return;
     }
-
+  
     setIsLoading(true);
-
+  
     try {
       const token = await AsyncStorage.getItem('token');
+      if (!token) {
+        throw new Error('Authentication token missing');
+      }
+  
+      console.log('Making API request:', {
+        url: `${api}/booking/assign-driver/${bookingId}`,
+        data: {
+          name: driverName,
+          contactNumber: driverNumber,
+          cabNumber: cabNumber,
+          carModel: cabModel,
+        },
+        token,
+      });
+  
       const response = await fetch(`${api}/booking/assign-driver/${bookingId}`, {
         method: 'PUT',
         headers: {
@@ -53,26 +69,29 @@ const DriverAllocation = () => {
           carModel: cabModel,
         }),
       });
-
+  
       const res = await response.json();
-
+      console.log('API response:', res);
+  
       if (!response.ok || !res.success) {
         throw new Error(res.message || 'Failed to allocate driver');
       }
-
+  
       Toast.show({
         type: 'success',
         position: 'top',
         text1: 'Driver Assigned',
         text2: 'Driver details assigned and email sent successfully!',
       });
-
+  
       navigation.navigate('Status' as never);
     } catch (error: unknown) {
       let errorMessage = 'Failed to allocate driver. Please try again.';
       if (error instanceof Error) {
         errorMessage = error.message;
       }
+      console.error('Error:', errorMessage);
+  
       Toast.show({
         type: 'error',
         position: 'top',
@@ -83,13 +102,56 @@ const DriverAllocation = () => {
       setIsLoading(false);
     }
   };
-  const handleCancelBooking = () => {
-    navigation.navigate('AdminHome' as never);
+   
+  const handleCancelBooking = async () => {
+    setIsCancelling(true);
+    try {
+      const token = await AsyncStorage.getItem('token');
+      if (!token) {
+        throw new Error('Authentication token missing');
+      }
+
+      const response = await fetch(`${api}/booking/deletebooking/${bookingId}`, {
+        method: 'DELETE',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to delete booking');
+      }
+
+      Toast.show({
+        type: 'success',
+        position: 'top',
+        text1: 'Booking Deleted',
+        text2: 'The booking has been successfully cancelled.',
+      });
+
+      navigation.navigate('AdminHome' as never);
+    } catch (error) {
+      console.error('Error cancelling booking:', error);
+      Toast.show({
+        type: 'error',
+        position: 'top',
+        text1: 'Error',
+        text2: 'Failed to cancel booking. Please try again.',
+      });
+    } finally {
+      setIsCancelling(false);
+    }
   };
 
   const handleDriverNumberChange = (text: string) => {
     if (/^\d*$/.test(text)) {
       setDriverNumber(text);
+    }
+  };
+
+  const handleDriverNameChange = (text: string) => {
+    if (/^[a-zA-Z\s]*$/.test(text)) {
+      setDriverName(text);
     }
   };
 
@@ -108,8 +170,8 @@ const DriverAllocation = () => {
         className="border border-gray-300 rounded-lg p-4 mb-6 text-base"
         placeholder="Enter the Driver Name"
         value={driverName}
-        onChangeText={setDriverName}
-        editable={!isLoading}
+        onChangeText={handleDriverNameChange}
+        editable={!isLoading && !isCancelling}
       />
       <Text className="text-lg font-semibold mb-2">Cab Number</Text>
       <TextInput
@@ -117,7 +179,7 @@ const DriverAllocation = () => {
         placeholder="Enter the Cab Number"
         value={cabNumber}
         onChangeText={setCabNumber}
-        editable={!isLoading}
+        editable={!isLoading && !isCancelling}
       />
       <Text className="text-lg font-semibold mb-2">Driver's Contact No.</Text>
       <TextInput
@@ -126,13 +188,13 @@ const DriverAllocation = () => {
         value={driverNumber}
         onChangeText={handleDriverNumberChange}
         keyboardType="numeric"
-        editable={!isLoading}
+        editable={!isLoading && !isCancelling}
       />
       <Text className="text-lg font-semibold mb-2">Cab Model</Text>
       <TouchableOpacity
         className="border border-gray-300 rounded-lg p-4 pb-6 mb-6 text-base"
         onPress={() => setIsDropdownVisible(true)}
-        disabled={isLoading}
+        disabled={isLoading || isCancelling}
       >
         <Text>{cabModel}</Text>
       </TouchableOpacity>
@@ -164,21 +226,23 @@ const DriverAllocation = () => {
 
       <View className="flex-row justify-between mt-4">
         <TouchableOpacity
-          className={`flex-1 rounded-lg py-4 mr-2 ${driverName && cabNumber && driverNumber && cabModel && !isLoading
+          className={`flex-1 rounded-lg py-4 mr-2 ${
+            driverName && cabNumber && driverNumber && cabModel && !isLoading && !isCancelling
               ? 'bg-green-400'
               : 'bg-gray-300'
-            }`}
+          }`}
           onPress={handleDriverAllocation}
-          disabled={!driverName || !cabNumber || !driverNumber || !cabModel || isLoading}
+          disabled={!driverName || !cabNumber || !driverNumber || !cabModel || isLoading || isCancelling}
         >
           {isLoading ? (
             <ActivityIndicator color="white" />
           ) : (
             <Text
-              className={`text-lg font-bold text-center ${driverName && cabNumber && driverNumber && cabModel
+              className={`text-lg font-bold text-center ${
+                driverName && cabNumber && driverNumber && cabModel
                   ? 'text-white'
                   : 'text-gray-500'
-                }`}
+              }`}
             >
               Allocate Driver
             </Text>
@@ -188,9 +252,13 @@ const DriverAllocation = () => {
         <TouchableOpacity
           className="flex-1 bg-red-500 rounded-lg py-4 ml-2"
           onPress={handleCancelBooking}
-          disabled={isLoading}
+          disabled={isLoading || isCancelling}
         >
-          <Text className="text-white text-lg font-bold text-center">Cancel Booking</Text>
+          {isCancelling ? (
+            <ActivityIndicator color="white" />
+          ) : (
+            <Text className="text-white text-lg font-bold text-center">Cancel Booking</Text>
+          )}
         </TouchableOpacity>
       </View>
     </View>
