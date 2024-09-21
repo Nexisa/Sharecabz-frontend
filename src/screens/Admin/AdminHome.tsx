@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { FlatList, Text, TouchableOpacity, View, TextInput, Alert } from "react-native";
+import { FlatList, Text, TouchableOpacity, View, TextInput, Alert, RefreshControl } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { useNavigation } from "@react-navigation/native";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -33,6 +33,7 @@ const AdminHome = () => {
   const [bookings, setBookings] = useState<Booking[]>([]);
   const [sortOrder, setSortOrder] = useState<"asc" | "desc">("asc");
   const [searchQuery, setSearchQuery] = useState<string>('');
+  const [refreshing, setRefreshing] = useState<boolean>(false);  // New state for refreshing
   const navigation = useNavigation<AdminHomeNavigationProp>();
   const dispatch = useDispatch();
   const api = process.env.EXPO_PUBLIC_API || 'http://localhost:3000/api'; // Fallback URL
@@ -43,6 +44,7 @@ const AdminHome = () => {
 
   const fetchBookings = async () => {
     try {
+      setRefreshing(true);  // Set refreshing to true when fetching starts
       const token = await AsyncStorage.getItem('token');
       const response = await fetch(`${api}/booking/getallbookings`, {
         method: 'GET',
@@ -60,6 +62,8 @@ const AdminHome = () => {
     } catch (error) {
       console.error("Error fetching bookings:", error);
       Alert.alert("Error", "Could not fetch bookings. Please try again later.");
+    } finally {
+      setRefreshing(false);  // Set refreshing to false once fetching is done
     }
   };
 
@@ -99,6 +103,10 @@ const AdminHome = () => {
     navigation.navigate('SignIn');
   };
 
+  const onRefresh = () => {
+    fetchBookings();  // Call fetchBookings to refresh the data
+  };
+
   return (
     <SafeAreaView className="flex-1 bg-white">
       <View className="flex-row items-center p-2 border-b border-gray-300">
@@ -135,6 +143,13 @@ const AdminHome = () => {
           keyExtractor={(item) => item._id}
           initialNumToRender={10}
           removeClippedSubviews={true}
+          refreshControl={
+            <RefreshControl
+              refreshing={refreshing}
+              onRefresh={onRefresh}
+              tintColor="#000"
+            />
+          }
         />
       )}
     </SafeAreaView>

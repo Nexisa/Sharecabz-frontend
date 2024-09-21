@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, Image, TouchableOpacity, TextInput, ScrollView, SafeAreaView } from 'react-native';
+import { View, Text, Image, TouchableOpacity, TextInput, ScrollView, SafeAreaView, ActivityIndicator } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -32,6 +32,7 @@ const UserDetailPage = () => {
     totalSeats: '',
     paymentStatus: '',
   });
+  const [loading, setLoading] = useState<boolean>(true); // Added loading state
   
   const api = process.env.EXPO_PUBLIC_API;
 
@@ -81,8 +82,11 @@ const UserDetailPage = () => {
         totalSeats: data.seats ? data.seats.toString() : 'N/A',
         paymentStatus: data.paymentStatus || 'N/A',
       });
+
+      setLoading(false); // Set loading to false once data is fetched
     } catch (error) {
       console.log('Error fetching user details:', error);
+      setLoading(false); // Set loading to false in case of error
     }
   };
 
@@ -117,41 +121,50 @@ const UserDetailPage = () => {
           <Text className="text-lg font-bold ml-4">User Booking Details</Text>
         </View>
 
-        <View className="items-center py-6 bg-white mb-4">
-          <Image
-            className="w-24 h-24 rounded-full mb-3"
-            source={require('../../../assets/Images/profile_image.png')}
-          />
-          <Text className="text-xl font-bold text-gray-800">{userDetails.username || 'N/A'}</Text>
-          <Text className="text-sm text-gray-600">{userDetails.email}</Text>
-        </View>
+        {loading ? ( // Show loading indicator when fetching data
+          <View className="flex-1 justify-center items-center mt-10">
+            <ActivityIndicator size="large" color="#00ff00" />
+            <Text className="mt-3 text-gray-500">Loading...</Text>
+          </View>
+        ) : (
+          <>
+            <View className="items-center py-6 bg-white mb-4">
+              <Image
+                className="w-24 h-24 rounded-full mb-3"
+                source={require('../../../assets/Images/profile_image.png')}
+              />
+              <Text className="text-xl font-bold text-gray-800">{userDetails.username || 'N/A'}</Text>
+              <Text className="text-sm text-gray-600">{userDetails.email}</Text>
+            </View>
 
-        <View className="bg-white rounded-lg mx-4 p-4 mb-6">
-          {renderDetailItem('Email', userDetails.email)}
-          {renderDetailItem('Phone', userDetails.phone)}
-          {renderDetailItem('Source Location', userDetails.sourceLocation)}
-          {renderDetailItem('Destination Location', userDetails.destinationLocation)}
-          {renderDetailItem('Pickup Location', userDetails.pickupLocation)}
-          {renderDetailItem('Date', userDetails.date)}
-          {renderDetailItem('Time', userDetails.departureTime)}
-          {renderDetailItem('Total Seats', userDetails.totalSeats)}
-        </View>
+            <View className="bg-white rounded-lg mx-4 p-4 mb-6">
+              {renderDetailItem('Email', userDetails.email)}
+              {renderDetailItem('Phone', userDetails.phone)}
+              {renderDetailItem('Source Location', userDetails.sourceLocation)}
+              {renderDetailItem('Destination Location', userDetails.destinationLocation)}
+              {renderDetailItem('Pickup Location', userDetails.pickupLocation)}
+              {renderDetailItem('Date', userDetails.date)}
+              {renderDetailItem('Time', userDetails.departureTime)}
+              {renderDetailItem('Total Seats', userDetails.totalSeats)}
+            </View>
 
-        <View className="flex-row justify-between px-4 mb-6">
-          <TouchableOpacity 
-            onPress={() => navigation.navigate('AdminHome')} 
-            className="bg-red-500 py-4 px-6 rounded-lg flex-1 mr-2 items-center"
-          >
-            <Text className="text-white font-bold text-base">Cancel</Text>
-          </TouchableOpacity>
+            <View className="flex-row justify-between px-4 mb-6">
+              <TouchableOpacity 
+                onPress={() => navigation.navigate('AdminHome')} 
+                className="bg-red-500 py-4 px-6 rounded-lg flex-1 mr-2 items-center"
+              >
+                <Text className="text-white font-bold text-base">Cancel</Text>
+              </TouchableOpacity>
 
-          <TouchableOpacity 
-            onPress={() => navigation.navigate('DriverAllocation', { bookingId })} 
-            className="bg-green-500 py-4 px-6 rounded-lg flex-1 ml-2 items-center"
-          >
-            <Text className="text-white font-bold text-base">Next Page</Text>
-          </TouchableOpacity>
-        </View>
+              <TouchableOpacity 
+                onPress={() => navigation.navigate('DriverAllocation', { bookingId })} 
+                className="bg-green-500 py-4 px-6 rounded-lg flex-1 ml-2 items-center"
+              >
+                <Text className="text-white font-bold text-base">Next Page</Text>
+              </TouchableOpacity>
+            </View>
+          </>
+        )}
       </ScrollView>
     </SafeAreaView>
   );
