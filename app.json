@@ -18,8 +18,7 @@
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#ffffff"
-      },
-      "enableHermes": false
+      }
       ,"package": "com.sharecabz"
     },
     "web": {
