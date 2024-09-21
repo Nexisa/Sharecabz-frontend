@@ -4,7 +4,6 @@ import { Ionicons } from '@expo/vector-icons';
 import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { StackNavigationProp } from '@react-navigation/stack';
-import moment from 'moment'; // Use moment for date formatting
 
 // Define types for your stack
 type RootStackParamList = {
@@ -38,6 +37,29 @@ const UserDetailPage = () => {
   
   const api = process.env.EXPO_PUBLIC_API; // Use your actual environment variable
 
+  // Utility function to format date
+  const formatDate = (dateString: string) => {
+    const date = new Date(dateString);
+    return new Intl.DateTimeFormat('en-GB', {
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit',
+    }).format(date); // Formats the date as 'DD/MM/YYYY'
+  };
+
+  // Utility function to format time
+  const formatTime = (timeString: string) => {
+    const [hours, minutes] = timeString.split(':');
+    const date = new Date();
+    date.setHours(Number(hours), Number(minutes));
+
+    return date.toLocaleTimeString([], {
+      hour: '2-digit',
+      minute: '2-digit',
+      hour12: true,
+    }); // Formats time as 'hh:mm AM/PM'
+  };
+
   const fetchUserDetails = async () => {
     try {
       const token = await AsyncStorage.getItem('token');
@@ -70,8 +92,8 @@ const UserDetailPage = () => {
         sourceLocation: data.sourceLocation || 'N/A',
         destinationLocation: data.destinationLocation || 'N/A',
         pickupLocation: data.pickupPoint || 'N/A',
-        date: moment(data.startDate).format('YYYY-MM-DD'), // Format date
-        time: moment(data.departureTime, 'HH:mm').format('hh:mm A'), // Format time
+        date: formatDate(data.startDate), // Format date using the custom function
+        time: formatTime(data.departureTime), // Format time using the custom function
         totalSeats: data.seats.toString() || 'N/A', // Convert seats to string
         paymentStatus: data.paymentStatus || 'N/A',
       });
