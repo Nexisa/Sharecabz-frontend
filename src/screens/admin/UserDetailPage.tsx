@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, StyleSheet, Image, TouchableOpacity, TextInput, ScrollView } from 'react-native';
+import { View, Text, Image, TouchableOpacity, TextInput, ScrollView } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -86,7 +86,7 @@ const UserDetailPage = () => {
 
       // Ensure you map the correct field names from your API response
       setUserDetails({
-        username: data.userId.username || 'N/A', // Assuming 'username' exists on userId
+        username: data.username || 'N/A', // Assuming 'username' exists on userId
         email: data.userId.email || 'N/A',
         phone: data.userId.phone || 'N/A', // Ensure phone exists on userId
         sourceLocation: data.sourceLocation || 'N/A',

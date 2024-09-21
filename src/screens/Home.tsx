@@ -1,10 +1,9 @@
 import React, { useState } from 'react';
-import { View, ImageBackground, StyleSheet, Text, TouchableOpacity, Image, SafeAreaView, Dimensions, Modal } from 'react-native';
+import { View, ImageBackground, StyleSheet, Text, TouchableOpacity, Image, SafeAreaView, Dimensions } from 'react-native';
 import { useDispatch } from 'react-redux';
 import { login } from '../utils/Slice';
 import { useNavigation } from '@react-navigation/native';
 import ProfileModal from '../components/ProfileModal';
-import { Ionicons } from '@expo/vector-icons';
 const { width, height } = Dimensions.get('window');
 
 
@@ -104,7 +103,7 @@ const styles = StyleSheet.create({
         lineHeight: width * 0.1,
     },
     luxuryText: {
-        fontFamily: 'RobotoSlab-Variable',
+        fontFamily: 'Roboto',
         fontSize: width * 0.08,
         color: '#3B3B3B',
         fontWeight: 'bold',

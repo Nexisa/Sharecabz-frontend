@@ -18,8 +18,8 @@
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#ffffff"
-      },
-      "package": "com.sharecabz"
+      }
+      ,"package": "com.sharecabz"
     },
     "web": {
       "favicon": "./assets/favicon.png"
