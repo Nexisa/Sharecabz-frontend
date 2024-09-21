@@ -13,8 +13,7 @@
       "env": {
         "EXPO_PUBLIC_API": "https://sharecabz-backend.onrender.com/api"
         
-      },
-      "workflow": "managed"
+      }
     },
     "production": {}
   },
