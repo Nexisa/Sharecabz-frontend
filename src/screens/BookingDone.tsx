@@ -30,7 +30,6 @@ const BookingDoneScreen = () => {
                 <View className="bg-white rounded-t-3xl h-1/3 p-8 items-center justify-between">
                     <Text className="text-3xl font-bold text-black text-center mb-4">
                         Thank You for Booking 
-                        Complete your Payment to the Driver!!
                     </Text>
                     <View className="w-full items-center">
                     <Entypo name="location" size={30} color="red" />
