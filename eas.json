@@ -11,8 +11,7 @@
     "preview": {
       "distribution": "internal",
       "env": {
-        "EXPO_PUBLIC_API": "https://sharecabz-backend.onrender.com/api"
-        
+        "EXPO_PUBLIC_API": "https://sharecabz-backend.onrender.com/api"  
       }
     },
     "production": {}

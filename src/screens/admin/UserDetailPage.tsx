@@ -64,7 +64,7 @@ const UserDetailPage = () => {
 
       // Ensure you map the correct field names from your API response
       setUserDetails({
-        username: data.userId.username || 'N/A', // Assuming 'username' exists on userId
+        username: data.username || 'N/A', // Assuming 'username' exists on userId
         email: data.userId.email || 'N/A',
         phone: data.userId.phone || 'N/A', // Ensure phone exists on userId
         sourceLocation: data.sourceLocation || 'N/A',

@@ -92,7 +92,6 @@ const RideBookingScreen: React.FC<Props> = ({ navigation }) => {
         setIsLoading(false);
         return;
       }
-
       const response = await fetch(`${apiUrl}/booking/createbooking`, {
         method: 'POST',
         headers: {
@@ -104,11 +103,12 @@ const RideBookingScreen: React.FC<Props> = ({ navigation }) => {
           destinationLocation: jsonData.destination?.label || '',
           pickupPoint: jsonData.pickupPoint?.label || '',
           departureTime: jsonData.departureTime || '',
-          seats: jsonData.seats || 1,
+          seats: jsonData.passengerno || 1,
           startDate: jsonData.date || '',
           endDate: jsonData.date || '',
         }),
       });
+     
       const result = await response.json();
 
       if (response.status !== 201) {
