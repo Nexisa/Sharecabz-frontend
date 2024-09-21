@@ -1,11 +1,10 @@
 import React from 'react';
-import { View, ImageBackground, Text, TouchableOpacity, Image, Dimensions, SafeAreaView } from 'react-native';
+import { View,  Text, TouchableOpacity, Image, SafeAreaView } from 'react-native';
 import { useDispatch } from 'react-redux';
 import { login } from '../utils/Slice';
 import { useNavigation } from '@react-navigation/native';
 import { LinearGradient } from 'expo-linear-gradient';
 import Entypo from '@expo/vector-icons/Entypo';
-const { width, height } = Dimensions.get('window');
 
 const BookingDoneScreen = () => {
     const navigation = useNavigation();

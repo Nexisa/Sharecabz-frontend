@@ -4,7 +4,7 @@ import { Ionicons } from '@expo/vector-icons';
 import ProfileModal from '../components/ProfileModal';
 import { useNavigation } from '@react-navigation/native';
 import { LinearGradient } from 'expo-linear-gradient';
-const { width, height } = Dimensions.get('window');
+const { width } = Dimensions.get('window');
 
 import FontAwesome6 from '@expo/vector-icons/FontAwesome6';
 

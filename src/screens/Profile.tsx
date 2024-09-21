@@ -19,7 +19,6 @@ import { updateProfile } from '../utils/ProfileSlice';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import Toast from 'react-native-toast-message';
 
-const { width } = Dimensions.get('window');
 
 type RootStackParamList = {
   ProfileScreen: undefined;
